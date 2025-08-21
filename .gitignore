@@ -2,3 +2,4 @@ archive
 .history
 .phpdoc
 Docs_OLD
+bin/phpDocumentor.phar
