@@ -125,7 +125,7 @@ class Debugger {
      * @param  mixed $title
      * @return void
      */
-    public function debug_log(array &$debug_array, string $txt, ?string $title = null) {
+    public function debug_log(array &$debug_array, string $txt, ?string $title = Null) {
 
         if ($this->verbose === true) {
             $push = 
