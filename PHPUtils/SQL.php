@@ -64,7 +64,7 @@ class SQL extends Base {
      * @param  string $return The type of return to expect (id, array, object)
      * @return void
      */
-    function executeQuery(string $statement, array $params = [], string $return = Null) {
+    function executeQuery(string $statement, array $params = [], ?string $return = null) {
         global $sqlcon;
     
         # allow for the statement to contain constants directly (probably not such a good idea)
