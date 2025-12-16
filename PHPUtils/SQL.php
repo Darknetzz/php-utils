@@ -47,7 +47,7 @@ class SQL extends Base {
      * @param  string $db The database to connect to, defaults to null
      * @return mysqli The mysqli object
      */
-    function connectDB(string $host, string $user, string $pass, string $db = null) {
+    function connectDB(string $host, string $user, string $pass, ?string $db = null) {
         return new mysqli($host, $user, $pass, $db);
     }
     
@@ -252,7 +252,7 @@ class SQL extends Base {
          * @param  string $value The value to filter by
          * @return int The number of rows in the table
          */
-        function countRows(string $table, string $column = null, string $value = null) {
+        function countRows(string $table, ?string $column = null, ?string $value = null) {
             global $sql;
             $query = "SELECT COUNT(*) FROM $table";
             if (!empty($column) && !empty($value)) {
