@@ -22,7 +22,7 @@ class SQLTest extends TestCase
         // Try to create a connection, but don't fail if MySQL isn't available
         // Tests will skip themselves if connection is needed
         try {
-            $this->connection = @new mysqli('localhost', 'test', 'test', '');
+            $this->connection = @new mysqli('localhost', 'test', 'test', null);
             if ($this->connection && $this->connection->connect_error) {
                 $this->connection = null;
             }

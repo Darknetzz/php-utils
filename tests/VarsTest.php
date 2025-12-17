@@ -84,7 +84,7 @@ class VarsTest extends TestCase
         $this->assertEquals($array, $decoded);
     }
 
-    public function testInMdArray()
+    public function testInMultiDimensionalArray()
     {
         $haystack = [
             'level1' => [
@@ -102,7 +102,7 @@ class VarsTest extends TestCase
         $this->assertFalse($this->vars->in_md_array($haystack, 'notfound'));
     }
 
-    public function testInMdArrayWithKeySearch()
+    public function testInMultiDimensionalArrayWithKeySearch()
     {
         $haystack = [
             'key1' => 'value1',
