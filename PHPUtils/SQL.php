@@ -311,6 +311,7 @@ class SQL extends Base {
         public function getUniqueRows(string $table, string $column): array {
             // Note: This method has SQL injection risk if $table/$column come from user input
             // In production, you should whitelist allowed table/column names
+            $getRows = $this->executeQuery("SELECT DISTINCT `$column` FROM `$table` ORDER BY `$column` ASC");
             if (!($getRows instanceof \mysqli_result)) {
                 throw new \RuntimeException("getUniqueRows query did not return a valid result set.");
             }
