@@ -311,6 +311,13 @@ class SQL extends Base {
          * @throws \InvalidArgumentException If the identifier contains invalid characters
          */
         private function validateIdentifier(string $identifier, string $type = 'identifier'): string {
+            // Check for empty identifier
+            if (empty($identifier)) {
+                throw new \InvalidArgumentException(
+                    "Invalid $type name: identifier cannot be empty."
+                );
+            }
+            
             // Ensure identifier starts with a letter or underscore, followed by alphanumeric characters or underscores
             // This matches standard SQL naming conventions and prevents SQL injection
             if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $identifier)) {

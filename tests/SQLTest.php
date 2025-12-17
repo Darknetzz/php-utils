@@ -355,10 +355,25 @@ class SQLTest extends TestCase
         $this->sql->setConnection($this->connection);
         
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('cannot start with a number');
+        $this->expectExceptionMessage('Must start with a letter or underscore');
         
         // Table name starting with a number
         $this->sql->countRows('123users');
+    }
+
+    public function testValidateIdentifierRejectsEmptyString()
+    {
+        if (!$this->connection || $this->connection->connect_error) {
+            $this->markTestSkipped('MySQL connection not available');
+        }
+
+        $this->sql->setConnection($this->connection);
+        
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('identifier cannot be empty');
+        
+        // Empty table name
+        $this->sql->countRows('');
     }
 }
 
