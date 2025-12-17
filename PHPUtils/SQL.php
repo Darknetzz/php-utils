@@ -303,6 +303,7 @@ class SQL extends Base {
          * 
          * Validate a SQL identifier (table or column name) to prevent SQL injection.
          * Only allows alphanumeric characters and underscores.
+         * Identifiers must start with a letter or underscore.
          * 
          * @param  string $identifier The identifier to validate
          * @param  string $type The type of identifier (e.g., 'table', 'column') for error messages
@@ -310,18 +311,11 @@ class SQL extends Base {
          * @throws \InvalidArgumentException If the identifier contains invalid characters
          */
         private function validateIdentifier(string $identifier, string $type = 'identifier'): string {
-            // Allow alphanumeric characters and underscores only
+            // Ensure identifier starts with a letter or underscore, followed by alphanumeric characters or underscores
             // This matches standard SQL naming conventions and prevents SQL injection
-            if (!preg_match('/^[a-zA-Z0-9_]+$/', $identifier)) {
+            if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $identifier)) {
                 throw new \InvalidArgumentException(
-                    "Invalid $type name: '$identifier'. Only alphanumeric characters and underscores are allowed."
-                );
-            }
-            
-            // Additional check: identifier cannot start with a number (MySQL restriction)
-            if (preg_match('/^[0-9]/', $identifier)) {
-                throw new \InvalidArgumentException(
-                    "Invalid $type name: '$identifier'. Identifiers cannot start with a number."
+                    "Invalid $type name: '$identifier'. Must start with a letter or underscore and contain only alphanumeric characters and underscores."
                 );
             }
             
