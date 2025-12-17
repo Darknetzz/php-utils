@@ -370,7 +370,7 @@ class SQLTest extends TestCase
         $this->sql->setConnection($this->connection);
         
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('identifier cannot be empty');
+        $this->expectExceptionMessage('cannot be empty');
         
         // Empty table name
         $this->sql->countRows('');

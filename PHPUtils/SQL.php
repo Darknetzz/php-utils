@@ -314,7 +314,7 @@ class SQL extends Base {
             // Check for empty identifier
             if (empty($identifier)) {
                 throw new \InvalidArgumentException(
-                    "Invalid $type name: identifier cannot be empty."
+                    "Invalid $type name: cannot be empty."
                 );
             }
             
