@@ -21,4 +21,3 @@ namespace PHPUtils;
 class Navigation extends Base {
 
 }
-?>

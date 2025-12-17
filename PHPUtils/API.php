@@ -21,5 +21,3 @@ namespace PHPUtils;
 class API extends Base {
 
 }
-
-?>

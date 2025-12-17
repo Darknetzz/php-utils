@@ -118,5 +118,3 @@ class Strings extends Base {
         return $newUrl;
     }
 }
-
-?>

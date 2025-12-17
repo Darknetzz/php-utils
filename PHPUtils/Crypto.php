@@ -80,5 +80,3 @@ class Crypto extends Base {
         return hash($hashmethod, $str) == $hash;
     }
 }
-
-?>

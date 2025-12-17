@@ -19,4 +19,3 @@ namespace PHPUtils;
 class Auth extends Base {
         
 }
-?>

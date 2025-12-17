@@ -102,4 +102,3 @@ class Random extends Base {
     }
 
 }
-?>

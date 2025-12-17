@@ -8,4 +8,3 @@ namespace PHPUtils;
 class Session extends Base {
     
 }
-?>

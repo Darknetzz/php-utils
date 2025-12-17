@@ -26,5 +26,3 @@ class Funcs extends Base {
         return $paramCount;
     }
 }
-
-?>
