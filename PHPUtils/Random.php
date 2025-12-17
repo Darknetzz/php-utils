@@ -1,5 +1,7 @@
 <?php
 
+namespace PHPUtils;
+
 /**
  * The Random class provides various randomization functions.
  */
@@ -100,4 +102,3 @@ class Random extends Base {
     }
 
 }
-?>

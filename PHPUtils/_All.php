@@ -55,7 +55,9 @@ foreach (glob($classFolder.'/*.php') as $fileToInclude) {
 
     require_once($fileToInclude);
 
-    if (!class_exists($className)) {
+    // Check for class with namespace
+    $fullyQualifiedClassName = "PHPUtils\\" . $className;
+    if (!class_exists($fullyQualifiedClassName) && !class_exists($className)) {
         continue;
     }
 
@@ -64,6 +66,3 @@ foreach (glob($classFolder.'/*.php') as $fileToInclude) {
 
 }
 # ──────────────────────────────────────────────────────────────────────────────────────────────── #
-
-
-?>

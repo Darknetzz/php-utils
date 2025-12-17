@@ -1,5 +1,7 @@
 <?php
 
+namespace PHPUtils;
+
 /* ────────────────────────────────────────────────────────────────────────── */
 /*                                  Debugger                                  */
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -23,74 +25,96 @@
 class Debugger {
 
     public bool $verbose;
-    private $vars;
+    private Vars $vars;
         
     /**
      * __construct
      *
-     * @param  mixed $verbose
-     * @param  mixed $debug_array
+     * @param  bool $verbose
+     * @param  Vars|null $vars Optional Vars instance for dependency injection
      * @return void
      */
-    function __construct(bool $verbose = false)
+    public function __construct(bool $verbose = false, ?Vars $vars = null)
     {
         $this->verbose = $verbose;
-
-        # Instantiate Vars class
-        $this->vars     = new Vars();
+        $this->vars = $vars ?? new Vars();
     }
 
 
     /**
      * format
+     * 
+     * Format debug output as HTML (legacy method for backward compatibility)
      *
-     * @param  mixed $txt
-     * @param  mixed $type
-     * @param  mixed $icon
-     * @return void
+     * @param  mixed $input
+     * @param  string $type
+     * @return string HTML formatted output
      */
-    function format(mixed $input, string $type = 'info') {
-
+    public function format(mixed $input, string $type = 'info'): string {
+        $data = $this->formatData($input, $type);
+        return $this->formatAsHtml($data);
+    }
+    
+    /**
+     * formatData
+     * 
+     * Format debug output as structured data (separated from presentation)
+     *
+     * @param  mixed $input
+     * @param  string $type
+     * @return array Structured data
+     */
+    public function formatData(mixed $input, string $type = 'info'): array {
         if (empty($input)) {
             $input = '[empty]';
         }
 
-        if ($type == 'info') {
-            $icon = 'ℹ️';
-        }
-        if ($type == 'danger') {
-            $icon = '❌';
-        }
-        if ($type == 'warning') {
-            $icon = '⚠️';
-        }
-        if ($type == 'success') {
-            $icon = '✅';
-        }
-
-        $icon = (!empty($icon) ? $icon : null);
+        $icons = [
+            'info' => 'ℹ️',
+            'danger' => '❌',
+            'warning' => '⚠️',
+            'success' => '✅'
+        ];
+        
+        $icon = $icons[$type] ?? null;
 
         # Defaults (for string)
-        $header = $icon." ".$type;
-        $body   = $input;
+        $header = ($icon ? $icon . " " : "") . $type;
+        $body = $input;
 
         if (is_array($input)) {
             if (count($input) == 2) {
-                $header = $icon." ".$this->vars->stringify($input[0]);
-                $header = $icon." ".json_encode($input[0]);
-                $body   = json_encode($input[1]);
+                $header = ($icon ? $icon . " " : "") . json_encode($input[0]);
+                $body = json_encode($input[1]);
             }
             elseif (count($input) > 2) {
-                $header = $icon." ".$type;
-                $body   = json_encode($input, JSON_PRETTY_PRINT);
+                $header = ($icon ? $icon . " " : "") . $type;
+                $body = json_encode($input, JSON_PRETTY_PRINT);
             }
         }
 
+        return [
+            'type' => $type,
+            'icon' => $icon,
+            'header' => $header,
+            'body' => $body
+        ];
+    }
+    
+    /**
+     * formatAsHtml
+     * 
+     * Convert structured debug data to HTML
+     *
+     * @param  array $data
+     * @return string HTML formatted output
+     */
+    public function formatAsHtml(array $data): string {
         return '
-        <div class="alert alert-'.$type.'">
-        <h4>'.$header.'</h4>
+        <div class="alert alert-'.$data['type'].'">
+        <h4>'.$data['header'].'</h4>
         <hr>
-        '.$body.'
+        '.$data['body'].'
         </div>
         ';
     }
@@ -144,11 +168,11 @@ class Debugger {
     /**
      * debug_print
      *
-     * @param  mixed $debug_array
-     * @param  mixed $tableName
-     * @return void
+     * @param  array $debug_array
+     * @param  string $tableName
+     * @return string HTML formatted debug table
      */
-    function debug_print(array &$debug_array, $tableName = "Debug") {
+    public function debug_print(array &$debug_array, string $tableName = "Debug"): string {
 
         $tableName_slug = strtolower($tableName);
         $tableName_slug = preg_replace('/[^A-Za-z0-9\-]/', '', $tableName_slug);
@@ -188,10 +212,17 @@ class Debugger {
     // ─────────────────────────────────────────────────────────────────────────────────────────────── #
     //                                         THROW_EXCEPTION                                         #
     // ─────────────────────────────────────────────────────────────────────────────────────────────── #
-    function throw_exception($message) {
-        throw new Exception($message);
+    /**
+     * throw_exception
+     * 
+     * Throw an exception with the given message
+     *
+     * @param  string $message
+     * @return void
+     * @throws \Exception
+     */
+    public function throw_exception(string $message): void {
+        throw new \Exception($message);
     }
 
 }
-
-?>

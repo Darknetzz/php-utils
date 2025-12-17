@@ -3,3 +3,14 @@ archive
 .phpdoc
 Docs_OLD
 bin/phpDocumentor.phar
+
+# Composer
+vendor/
+composer.lock
+
+# PHPUnit
+.phpunit.result.cache
+coverage/
+
+# Old test directories (keeping for backward compatibility)
+test/SQLite.php

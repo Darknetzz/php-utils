@@ -1,5 +1,7 @@
 <?php
 
+namespace PHPUtils;
+
 /**
  * Funcs
  *
@@ -24,5 +26,3 @@ class Funcs extends Base {
         return $paramCount;
     }
 }
-
-?>

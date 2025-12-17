@@ -1,5 +1,7 @@
 <?php
 
+namespace PHPUtils;
+
 /**
  * Images
  * 
@@ -108,4 +110,3 @@ class Images extends Base {
         return '<img src="'.$imagePath.' height="'.$height.'" width="'.$width.'">';
     }
 }
-?>
