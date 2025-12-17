@@ -9,7 +9,7 @@ Your PHPUtils codebase has a **functional OOP structure** with some good practic
 ## ✅ What's Good
 
 1. **Inheritance Structure**: Using a `Base` class that other classes extend is a reasonable approach for shared functionality
-2. **Type Hints**: You're using PHP 8+ type hints (e.g., `string $host`, `?string $db = Null`) which is excellent
+2. **Type Hints**: You're using PHP 8+ type hints (e.g., `string $host`, `?string $db = null`) which is excellent
 3. **PHPDoc Comments**: Most methods have documentation, which is helpful
 4. **Class Organization**: Classes are organized by functionality (SQL, Strings, Network, etc.)
 5. **PHP 8+ Requirement**: You're requiring PHP 8+, which allows modern features

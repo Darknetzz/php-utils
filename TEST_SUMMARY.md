@@ -6,7 +6,7 @@ A comprehensive PHPUnit test suite has been created for the PHPUtils library.
 
 ## Test Results
 
-**Status:** ✅ **51 tests passing, 110 assertions**
+**Status:** ✅ **62 tests passing, 115 assertions, 8 skipped**
 
 ### Test Coverage
 

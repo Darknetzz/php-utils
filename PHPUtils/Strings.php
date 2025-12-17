@@ -57,12 +57,14 @@ class Strings extends Base {
         }
         
         if ($len < $visibility) {
-            $this->debugger->output("Parameter string is longer than visibility");
+            $this->debugger->output("Parameter string is shorter than visibility");
             return null;
         }
         
-        // TODO: Implement actual hiding logic
-        return $string;
+        $visiblePart = substr($string, 0, $visibility);
+        $hiddenLength = $len - $visibility;
+        
+        return $visiblePart . str_repeat('*', $hiddenLength);
     }
     
     /**
@@ -76,7 +78,7 @@ class Strings extends Base {
      */
     public function cap(string $string, int $maxlen = 30): string {
         if (strlen($string) > $maxlen) {
-            return substr($string, 0, 30)."...";
+            return substr($string, 0, $maxlen)."...";
         }
         return $string;
     }

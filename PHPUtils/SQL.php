@@ -106,7 +106,7 @@ class SQL extends Base {
      * @param  string $statement The SQL statement to execute
      * @param  array $params The parameters to bind to the statement
      * @param  string|null $return The type of return to expect (self::RETURN_RESULT or self::RETURN_ID)
-     * @return \mysqli_result|int|false
+     * @return \mysqli_result|int Returns mysqli_result for SELECT queries, int for INSERT (insert_id), or false for non-result queries
      * @throws \RuntimeException If connection not set or query fails
      * @throws \InvalidArgumentException If invalid return type specified
      */
@@ -128,7 +128,13 @@ class SQL extends Base {
     
         $paramsCount = count($params);
         if ($paramsCount > 0) {
-            $types = str_repeat('s', $paramsCount);
+            // Infer types from parameter values
+            $types = implode('', array_map(function($param) {
+                if (is_int($param)) return 'i';
+                if (is_float($param)) return 'd';
+                if (is_string($param)) return 's';
+                return 'b'; // blob for anything else
+            }, $params));
             $query->bind_param($types, ...$params);
         }
     
@@ -142,11 +148,9 @@ class SQL extends Base {
             return $this->connection->insert_id;
         }
     
-        if (!empty($this->connection->error)) {
-            throw new \RuntimeException("executeQuery() - Fatal error: " . $this->connection->error);
-        }
-    
-        if ($return === self::RETURN_RESULT || $return === null) {
+        if ($return === self::RETURN_RESULT) {
+            // For statements that do not produce a result set (e.g. INSERT/UPDATE/DELETE),
+            // mysqli_stmt::get_result() returns false. Callers must handle this case.
             return $result;
         }
         
