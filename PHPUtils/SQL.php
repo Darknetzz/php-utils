@@ -303,6 +303,37 @@ class SQL extends Base {
         }
 
         /**
+         * validateIdentifier
+         * 
+         * Validate a SQL identifier (table or column name) to prevent SQL injection.
+         * Only allows alphanumeric characters and underscores.
+         * Identifiers must start with a letter or underscore.
+         * 
+         * @param  string $identifier The identifier to validate
+         * @param  string $type The type of identifier (e.g., 'table', 'column') for error messages
+         * @return string The validated identifier
+         * @throws \InvalidArgumentException If the identifier contains invalid characters
+         */
+        private function validateIdentifier(string $identifier, string $type = 'identifier'): string {
+            // Check for empty identifier
+            if ($identifier === '') {
+                throw new \InvalidArgumentException(
+                    "Invalid $type name: cannot be empty."
+                );
+            }
+            
+            // Ensure identifier starts with a letter or underscore, followed by alphanumeric characters or underscores
+            // This matches standard SQL naming conventions and prevents SQL injection
+            if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $identifier)) {
+                throw new \InvalidArgumentException(
+                    "Invalid $type name: '$identifier'. Must start with a letter or underscore and contain only alphanumeric characters and underscores."
+                );
+            }
+            
+            return $identifier;
+        }
+
+        /**
          * getUniqueRows
          * 
          * Get the unique rows from a table
@@ -311,18 +342,21 @@ class SQL extends Base {
          * @param  string $column The column that should be unique
          * @return array The unique rows
          * @throws \RuntimeException If query fails
+         * @throws \InvalidArgumentException If table or column name is invalid
          */
         public function getUniqueRows(string $table, string $column): array {
-            // Note: This method has SQL injection risk if $table/$column come from user input
-            // In production, you should whitelist allowed table/column names
-            $getRows = $this->executeQuery("SELECT DISTINCT `$column` FROM `$table` ORDER BY `$column` ASC");
+            // Validate identifiers to prevent SQL injection
+            $validatedTable = $this->validateIdentifier($table, 'table');
+            $validatedColumn = $this->validateIdentifier($column, 'column');
+            
+            $getRows = $this->executeQuery("SELECT DISTINCT `$validatedColumn` FROM `$validatedTable` ORDER BY `$validatedColumn` ASC");
             if (!($getRows instanceof \mysqli_result)) {
                 throw new \RuntimeException("getUniqueRows query did not return a valid result set.");
             }
             $rows = [];
             while ($row = $getRows->fetch_assoc()) {
-                if (!empty($row[$column])) {
-                    $rows[] = $row[$column];
+                if (!empty($row[$validatedColumn])) {
+                    $rows[] = $row[$validatedColumn];
                 }
             }
             return $rows;
@@ -338,13 +372,17 @@ class SQL extends Base {
          * @param  string|null $value The value to filter by
          * @return int The number of rows in the table
          * @throws \RuntimeException If query fails
+         * @throws \InvalidArgumentException If table or column name is invalid
          */
         public function countRows(string $table, ?string $column = null, ?string $value = null): int {
-            // Note: This method has SQL injection risk if $table/$column come from user input
-            // In production, you should whitelist allowed table/column names
-            $query = "SELECT COUNT(*) FROM `$table`";
+            // Validate table name to prevent SQL injection
+            $validatedTable = $this->validateIdentifier($table, 'table');
+            
+            $query = "SELECT COUNT(*) FROM `$validatedTable`";
             if (!empty($column) && !empty($value)) {
-                $query .= " WHERE `$column` = ?";
+                // Validate column name to prevent SQL injection
+                $validatedColumn = $this->validateIdentifier($column, 'column');
+                $query .= " WHERE `$validatedColumn` = ?";
                 $result = $this->executeQuery($query, [$value]);
             } else {
                 $result = $this->executeQuery($query);
