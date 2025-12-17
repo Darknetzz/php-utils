@@ -56,6 +56,27 @@ class StringsTest extends TestCase
         $this->assertStringEndsWith('...', $result);
     }
 
+    public function testCapWithDifferentMaxLength()
+    {
+        $longString = 'This is a very long string that should be capped';
+        $result = $this->strings->cap($longString, 20);
+        
+        // Should be exactly 20 characters + "..." = 23 total
+        $this->assertEquals(23, strlen($result));
+        $this->assertStringEndsWith('...', $result);
+        $this->assertEquals('This is a very long ...', $result);
+    }
+
+    public function testCapWithVeryShortMaxLength()
+    {
+        $longString = 'This is a test';
+        $result = $this->strings->cap($longString, 5);
+        
+        // Should be exactly 5 characters + "..." = 8 total
+        $this->assertEquals(8, strlen($result));
+        $this->assertEquals('This ...', $result);
+    }
+
     public function testCapWithShortString()
     {
         $shortString = 'Short';
