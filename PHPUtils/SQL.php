@@ -302,7 +302,7 @@ class SQL extends Base {
          * validateIdentifier
          * 
          * Validate a SQL identifier (table or column name) to prevent SQL injection.
-         * Only allows alphanumeric characters, underscores, and hyphens.
+         * Only allows alphanumeric characters and underscores.
          * 
          * @param  string $identifier The identifier to validate
          * @param  string $type The type of identifier (e.g., 'table', 'column') for error messages
@@ -310,11 +310,11 @@ class SQL extends Base {
          * @throws \InvalidArgumentException If the identifier contains invalid characters
          */
         private function validateIdentifier(string $identifier, string $type = 'identifier'): string {
-            // Allow alphanumeric characters, underscores, and hyphens
-            // This regex matches common naming conventions while preventing SQL injection
-            if (!preg_match('/^[a-zA-Z0-9_-]+$/', $identifier)) {
+            // Allow alphanumeric characters and underscores only
+            // This matches standard SQL naming conventions and prevents SQL injection
+            if (!preg_match('/^[a-zA-Z0-9_]+$/', $identifier)) {
                 throw new \InvalidArgumentException(
-                    "Invalid $type name: '$identifier'. Only alphanumeric characters, underscores, and hyphens are allowed."
+                    "Invalid $type name: '$identifier'. Only alphanumeric characters and underscores are allowed."
                 );
             }
             

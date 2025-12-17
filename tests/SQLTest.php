@@ -328,14 +328,13 @@ class SQLTest extends TestCase
         $validIdentifiers = [
             'users',
             'user_data',
-            'user-data',
             'UserData',
             'user123',
             'data_2024',
         ];
         
         foreach ($validIdentifiers as $valid) {
-            $tableName = 'test_' . str_replace('-', '_', $valid);
+            $tableName = 'test_' . $valid;
             $this->connection->query("CREATE TEMPORARY TABLE `$tableName` (id INT)");
             
             try {
