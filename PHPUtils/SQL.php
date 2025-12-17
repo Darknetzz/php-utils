@@ -312,7 +312,7 @@ class SQL extends Base {
          */
         private function validateIdentifier(string $identifier, string $type = 'identifier'): string {
             // Check for empty identifier
-            if (empty($identifier)) {
+            if ($identifier === '') {
                 throw new \InvalidArgumentException(
                     "Invalid $type name: cannot be empty."
                 );
