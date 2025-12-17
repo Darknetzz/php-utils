@@ -1,4 +1,7 @@
 <?php
+
+namespace PHPUtils;
+
 class Network extends Base {
   
   /**
@@ -7,7 +10,7 @@ class Network extends Base {
    * @param  string $cidr The CIDR notation.
    * @return array The IP range as an array with two elements: lower IP and upper IP.
    */
-  function cidrToRange(string $cidr) {
+  public function cidrToRange(string $cidr): array {
     $range = array();
     $cidr = explode('/', $cidr);
     $range[0] = long2ip((ip2long($cidr[0])) & ((-1 << (32 - (int)$cidr[1]))));
@@ -21,9 +24,9 @@ class Network extends Base {
    * @param  string $ip The IP address to check.
    * @param  string $lowerip The lower IP address of the range.
    * @param  string $upperip The upper IP address of the range.
-   * @return bool True if the IP is within the range, false otherwise.
+   * @return bool|null True if the IP is within the range, false otherwise, null if invalid IPs.
    */
-  function ipInRange(string $ip, string $lowerip, string $upperip) {
+  public function ipInRange(string $ip, string $lowerip, string $upperip): ?bool {
     $ip         = ip2long($ip);
     $lower_long = ip2long($lowerip);
     $upper_long = ip2long($upperip);
@@ -47,11 +50,11 @@ class Network extends Base {
    * @param  bool $die_if_empty Whether to die if the user's IP cannot be determined.
    * @return string|array|null The user's IP address or an array with 'type' and 'userip' keys if $return_array is true. Returns null if $die_if_empty is false and the user's IP cannot be determined.
    */
-  function getUserIP(
+  public function getUserIP(
     ?string $reverse_proxy = null,
     bool $return_array = false,
     bool $die_if_empty = false
-  ) {
+  ): string|array|null {
     $ra     = (!empty($_SERVER['REMOTE_ADDR'])          ? $_SERVER['REMOTE_ADDR']          : null);
     $ff     = (!empty($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : null);
     $type   = (!empty($ff)                              ? "proxy"                          : "direct");
@@ -78,10 +81,10 @@ class Network extends Base {
    * @param  bool $die_if_empty Whether to die if the server's IP cannot be determined.
    * @return string|array|null The server's IP address or an array with 'type' and 'serverip' keys if $return_array is true. Returns null if $die_if_empty is false and the server's IP cannot be determined.
    */
-  function getServerIP(
+  public function getServerIP(
     bool $return_array = false,
     bool $die_if_empty = false
-  ) {
+  ): string|array|null {
     $serverip = (!empty($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : null);
 
     if (empty($serverip) && $die_if_empty !== false) {
@@ -104,7 +107,7 @@ class Network extends Base {
    * @param  string|null $proxy The IP address of the reverse proxy server.
    * @return bool True if the user is using a reverse proxy, false otherwise.
    */
-  function usesReverseProxy(?string $proxy = null) {
+  public function usesReverseProxy(?string $proxy = null): bool {
     $ra     = (!empty($_SERVER['REMOTE_ADDR'])          ? $_SERVER['REMOTE_ADDR']          : null);
     $ff     = (!empty($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : null);
 

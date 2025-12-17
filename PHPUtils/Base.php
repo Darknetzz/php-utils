@@ -1,5 +1,7 @@
 <?php
 
+namespace PHPUtils;
+
 # ──────────────────────────────────────────────────────────────────────────────────────────────── #
 #                                               BASE                                               #
 # ──────────────────────────────────────────────────────────────────────────────────────────────── #
@@ -14,41 +16,29 @@
     *
     * A base class to handle common functionalities
     */
-class Base {
+abstract class Base {
 
-    public $name = "PHPUtils";
-    public $author = "Darknetzz";
-    public $url    = "https://github.com/Darknetzz";
-    public $version = "1.0.0";
+    public string $name = "PHPUtils";
+    public string $author = "Darknetzz";
+    public string $url = "https://github.com/Darknetzz";
+    public string $version = "1.0.0";
 
-    public $debugger;
-    public $debug_log = [];
+    protected Debugger $debugger;
+    public array $debug_log = [];
+    protected Vars $vars;
+    protected bool $verbose = true;
 
-    public $vars;
-
-    public $verbose = true;
-
-
-    function __construct() {
-        
-        require_once('Debugger.php');
-        require_once('Vars.php');
-
-        if (empty($this->debugger)) {
-            $this->debugger = new Debugger($this->verbose);
-        }
-        # REVIEW: does the Base class infinitely
-        # reinstantiate itself every time a "new" is called?
-        # only when the instantiated class extends base, right?
-        # Instantiate a debugger with construct
-        
-        # NOTE: I don't think the base class should have a construct method at all
-
-        # Instantiate Vars class
-        if (empty($this->vars)) {
-            $this->vars     = new Vars();
-        }
-
+    /**
+     * __construct
+     * 
+     * @param Debugger|null $debugger Optional Debugger instance for dependency injection
+     * @param Vars|null $vars Optional Vars instance for dependency injection
+     * @param bool $verbose Whether to enable verbose debugging
+     */
+    public function __construct(?Debugger $debugger = null, ?Vars $vars = null, bool $verbose = true) {
+        $this->verbose = $verbose;
+        $this->debugger = $debugger ?? new Debugger($this->verbose);
+        $this->vars = $vars ?? new Vars();
     }
 
 }

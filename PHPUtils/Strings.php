@@ -1,5 +1,7 @@
 <?php
 
+namespace PHPUtils;
+
 /* ────────────────────────────────────────────────────────────────────────── */
 /*                                 Strings                                    */
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -16,9 +18,9 @@ class Strings extends Base {
     * @param  string $string The string to slugify.
     * @param  string $replace The character to replace spaces with. Default is '_'.
     * @param  int $lenCap The maximum length of the slug. Default is 0.
-    * @return void
+    * @return string The slugified string
     */
-    function slugify(string $string, string $replace = '_', int $lenCap = 0) {
+    public function slugify(string $string, string $replace = '_', int $lenCap = 0): string {
         
         $search = [
             ' ', '-', '_', '.',
@@ -42,20 +44,25 @@ class Strings extends Base {
     * hide
     *
     * @param  string $string The string to hide.
-    * @param  int $visible The number of characters to keep visible. Default is 3.
-    * @return void
+    * @param  int $visibility The number of characters to keep visible. Default is 3.
+    * @return string|null The hidden string or null if invalid
     */
-    function hide(string $string, int $visibility = 3) {
+    public function hide(string $string, int $visibility = 3): ?string {
         
         $len = strlen($string);
         
         if ($len < 3 || $len - $visibility < 0) {
             $this->debugger->output("Unable to hide string.");
+            return null;
         }
         
         if ($len < $visibility) {
             $this->debugger->output("Parameter string is longer than visibility");
+            return null;
         }
+        
+        // TODO: Implement actual hiding logic
+        return $string;
     }
     
     /**
@@ -67,7 +74,7 @@ class Strings extends Base {
      * @param  int $maxlen The maximum length of the string. Default is 30.
      * @return string The capped string
      */
-    function cap(string $string, int $maxlen = 30) {
+    public function cap(string $string, int $maxlen = 30): string {
         if (strlen($string) > $maxlen) {
             return substr($string, 0, 30)."...";
         }
@@ -83,7 +90,7 @@ class Strings extends Base {
      * @param  array $params The parameters to append
      * @return string The new URL
      */
-    function appendGetParamsToUrl(string $url, array $params = []) {
+    public function appendGetParamsToUrl(string $url, array $params = []): string {
         // Parse the URL into its components
         $urlComponents = parse_url($url);
 

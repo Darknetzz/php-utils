@@ -1,4 +1,7 @@
 <?php
+
+namespace PHPUtils;
+
 # ──────────────────────────────────────────────────────────────────────────────────────────────── #
 #                                                SQL                                               #
 # ──────────────────────────────────────────────────────────────────────────────────────────────── #
@@ -10,13 +13,44 @@
  * @package PHPUtils
  */
 class SQL extends Base {
-    function __construct() {
-        # TODO: Create a __construct class with the following
-        # (just make sure you don't break anything somewhere else):
-            // $this->sqlcon = new mysqli($host, $user, $pass, $db);
-            // if ($this->sqlcon->connect_error) {
-            //     throw new Exception("Connection failed: " . $this->sqlcon->connect_error);
-            // }
+    
+    private const RETURN_RESULT = 'result';
+    private const RETURN_ID = 'id';
+    
+    private ?\mysqli $connection = null;
+    
+    /**
+     * __construct
+     * 
+     * @param Debugger|null $debugger Optional Debugger instance
+     * @param Vars|null $vars Optional Vars instance
+     * @param bool $verbose Whether to enable verbose debugging
+     */
+    public function __construct(?Debugger $debugger = null, ?Vars $vars = null, bool $verbose = true) {
+        parent::__construct($debugger, $vars, $verbose);
+    }
+    
+    /**
+     * setConnection
+     * 
+     * Set the database connection (dependency injection)
+     *
+     * @param \mysqli $connection The mysqli connection object
+     * @return void
+     */
+    public function setConnection(\mysqli $connection): void {
+        $this->connection = $connection;
+    }
+    
+    /**
+     * getConnection
+     * 
+     * Get the current database connection
+     *
+     * @return \mysqli|null
+     */
+    public function getConnection(): ?\mysqli {
+        return $this->connection;
     }
     
     /**
@@ -27,10 +61,15 @@ class SQL extends Base {
      * @param  string $host The host to connect to
      * @param  string $user The username to use
      * @param  string $pass The password to use
-     * @return mysqli The mysqli object
+     * @return \mysqli The mysqli object
+     * @throws \RuntimeException If connection fails
      */
-    function connectHost(string $host, string $user, string $pass) {
-        return new mysqli($host, $user, $pass);
+    public function connectHost(string $host, string $user, string $pass): \mysqli {
+        $connection = new \mysqli($host, $user, $pass);
+        if ($connection->connect_error) {
+            throw new \RuntimeException("Connection failed: " . $connection->connect_error);
+        }
+        return $connection;
     }
     
     /* ────────────────────────────────────────────────────────────────────────── */
@@ -44,11 +83,16 @@ class SQL extends Base {
      * @param  string $host The host to connect to
      * @param  string $user The username to use
      * @param  string $pass The password to use
-     * @param  string $db The database to connect to, defaults to null
-     * @return mysqli The mysqli object
+     * @param  string|null $db The database to connect to, defaults to null
+     * @return \mysqli The mysqli object
+     * @throws \RuntimeException If connection fails
      */
-    function connectDB(string $host, string $user, string $pass, ?string $db = Null) {
-        return new mysqli($host, $user, $pass, $db);
+    public function connectDB(string $host, string $user, string $pass, ?string $db = null): \mysqli {
+        $connection = new \mysqli($host, $user, $pass, $db);
+        if ($connection->connect_error) {
+            throw new \RuntimeException("Connection failed: " . $connection->connect_error);
+        }
+        return $connection;
     }
     
     /* ────────────────────────────────────────────────────────────────────────── */
@@ -61,17 +105,26 @@ class SQL extends Base {
      *
      * @param  string $statement The SQL statement to execute
      * @param  array $params The parameters to bind to the statement
-     * @param  string $return The type of return to expect (id, array, object)
-     * @return mixed
+     * @param  string|null $return The type of return to expect (self::RETURN_RESULT or self::RETURN_ID)
+     * @return \mysqli_result|int|false
+     * @throws \RuntimeException If connection not set or query fails
+     * @throws \InvalidArgumentException If invalid return type specified
      */
-    function executeQuery(string $statement, array $params = [], ?string $return = "result") {
-        global $sqlcon;
+    public function executeQuery(string $statement, array $params = [], ?string $return = self::RETURN_RESULT): \mysqli_result|int|false {
+        if ($this->connection === null) {
+            // Fallback to global for backward compatibility, but log a warning
+            global $sqlcon;
+            if (isset($sqlcon) && $sqlcon instanceof \mysqli) {
+                $this->connection = $sqlcon;
+            } else {
+                throw new \RuntimeException("Database connection not set. Use setConnection() or set global \$sqlcon for backward compatibility.");
+            }
+        }
     
-        # allow for the statement to contain constants directly (probably not such a good idea)
-        # https://stackoverflow.com/questions/1563654/quoting-constants-in-php-this-is-a-my-constant
-        // $statement = str_replace(array_keys(get_defined_constants(true)['user']), get_defined_constants(true)['user'], $statement);
-    
-        $query = $sqlcon->prepare($statement);
+        $query = $this->connection->prepare($statement);
+        if ($query === false) {
+            throw new \RuntimeException("Failed to prepare query: " . $this->connection->error);
+        }
     
         $paramsCount = count($params);
         if ($paramsCount > 0) {
@@ -79,23 +132,25 @@ class SQL extends Base {
             $query->bind_param($types, ...$params);
         }
     
-        $query->execute();
+        if (!$query->execute()) {
+            throw new \RuntimeException("Query execution failed: " . $this->connection->error);
+        }
+        
         $result = $query->get_result();
 
-        if ($return == 'id') {
-            $result = $sqlcon->insert_id;
+        if ($return === self::RETURN_ID) {
+            return $this->connection->insert_id;
         }
     
-        if (!empty($sqlcon->error)) {
-            echo "<div class='alert alert-danger'>executeQuery() - Fatal error: $sqlcon->error</div>";
-            die();
+        if (!empty($this->connection->error)) {
+            throw new \RuntimeException("executeQuery() - Fatal error: " . $this->connection->error);
         }
     
-        if ($return == 'result') {
+        if ($return === self::RETURN_RESULT || $return === null) {
             return $result;
         }
-        echo "Invalid return type specified for `executeQuery`. Valid options are `result` or `id`.";
-        return False;
+        
+        throw new \InvalidArgumentException("Invalid return type specified for `executeQuery`. Valid options are '" . self::RETURN_RESULT . "' or '" . self::RETURN_ID . "'.");
     }
     /* ────────────────────────────────────────────────────────────────────────── */
         
@@ -104,10 +159,10 @@ class SQL extends Base {
      * 
      * Save the result of a query to an array
      *
-     * @param  mysqli_result $query The query to save
+     * @param  \mysqli_result $query The query to save
      * @return array The result of the query
      */
-    function save_result(mysqli_result $query) {
+    public function save_result(\mysqli_result $query): array {
         $result = [];
         while ($row = $query->fetch_assoc()) {
 
@@ -131,16 +186,31 @@ class SQL extends Base {
      * 
      * Get the last error from the SQL connection
      *
-     * @return string The last error from the SQL connection
+     * @return string The last error from the SQL connection, or empty string if no connection
      */
-    function error() {
-        global $sqlcon;
-        return $sqlcon->error;
+    public function error(): string {
+        if ($this->connection === null) {
+            global $sqlcon;
+            if (isset($sqlcon) && $sqlcon instanceof \mysqli) {
+                return $sqlcon->error;
+            }
+            return "";
+        }
+        return $this->connection->error;
     }
     
     
     // ------------------------[ setupDB ]------------------------ //
-    function setupDB($sqlcon, $templateArray) {
+    /**
+     * setupDB
+     * 
+     * Setup database tables (placeholder method)
+     *
+     * @param \mysqli $sqlcon The database connection
+     * @param array $templateArray Array of SQL statements to execute
+     * @return void
+     */
+    public function setupDB(\mysqli $sqlcon, array $templateArray): void {
         
         /*
         
@@ -181,10 +251,9 @@ class SQL extends Base {
          *                      - strip_chars: Whether to strip special characters from the search string (default True)
          *                      - search_min_len: The minimum length of the search string (default 0 - no minimum length)
          * 
-         * @return mysqli_result The result of the search
+         * @return \mysqli_result The result of the search
          */
-        function search(string $tablename, string $search, array $columns = ["name"], array $options = []) {
-            global $sql;
+        public function search(string $tablename, string $search, array $columns = ["name"], array $options = []): \mysqli_result {
 
             # Default options
             $delimiter      = (empty($options["delimiter"]) ? " " : $options["delimiter"]);
@@ -222,8 +291,11 @@ class SQL extends Base {
                     $searchQuery .= " LIMIT " . $limit;
                 }
             }
-            $searchResult = $sql->executeQuery($searchQuery, array_merge($searchParams, $searchParams));
-            return $searchResult;
+            $searchResult = $this->executeQuery($searchQuery, array_merge($searchParams, $searchParams));
+            if ($searchResult instanceof \mysqli_result) {
+                return $searchResult;
+            }
+            throw new \RuntimeException("Search query did not return a valid result set.");
         }
 
         /**
@@ -234,10 +306,14 @@ class SQL extends Base {
          * @param  string $table The table to get the rows from
          * @param  string $column The column that should be unique
          * @return array The unique rows
+         * @throws \RuntimeException If query fails
          */
-        function getUniqueRows(string $table, string $column) {
-            global $sql;
-            $getRows = $sql->executeQuery("SELECT DISTINCT $column FROM $table ORDER BY $column ASC");
+        public function getUniqueRows(string $table, string $column): array {
+            // Note: This method has SQL injection risk if $table/$column come from user input
+            // In production, you should whitelist allowed table/column names
+            if (!($getRows instanceof \mysqli_result)) {
+                throw new \RuntimeException("getUniqueRows query did not return a valid result set.");
+            }
             $rows = [];
             while ($row = $getRows->fetch_assoc()) {
                 if (!empty($row[$column])) {
@@ -253,21 +329,26 @@ class SQL extends Base {
          * Count the number of rows in a table
          * 
          * @param  string $table The table to count the rows in
-         * @param  string $column The column to filter by
-         * @param  string $value The value to filter by
+         * @param  string|null $column The column to filter by
+         * @param  string|null $value The value to filter by
          * @return int The number of rows in the table
+         * @throws \RuntimeException If query fails
          */
-        function countRows(string $table, ?string $column = Null, ?string $value = Null) {
-            global $sql;
-            $query = "SELECT COUNT(*) FROM $table";
+        public function countRows(string $table, ?string $column = null, ?string $value = null): int {
+            // Note: This method has SQL injection risk if $table/$column come from user input
+            // In production, you should whitelist allowed table/column names
+            $query = "SELECT COUNT(*) FROM `$table`";
             if (!empty($column) && !empty($value)) {
-                $query .= " WHERE $column = ?";
-                $result = $sql->executeQuery($query, [$value]);
+                $query .= " WHERE `$column` = ?";
+                $result = $this->executeQuery($query, [$value]);
             } else {
-                $result = $sql->executeQuery($query);
+                $result = $this->executeQuery($query);
+            }
+            if (!($result instanceof \mysqli_result)) {
+                throw new \RuntimeException("countRows query did not return a valid result set.");
             }
             $count = $result->fetch_row()[0];
-            return $count;
+            return (int)$count;
         }
         
 

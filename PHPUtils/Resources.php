@@ -1,5 +1,7 @@
 <?php
 
+namespace PHPUtils;
+
 /**
  * This class provides utility functions for including external resources in PHP applications.
  */
