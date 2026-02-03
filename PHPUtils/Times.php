@@ -40,8 +40,8 @@ class Times {
      * @return string The relative time
      */
     public function relativeTime($time, $format = null) {
-        $then     = new DateTime('now');
-        $now      = new DateTime($time);
+        $now      = new \DateTime('now');
+        $then     = new \DateTime($time);
         $diff     = $now->diff($then);
 
         # Translate the format

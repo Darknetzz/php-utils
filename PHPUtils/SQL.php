@@ -258,6 +258,11 @@ class SQL extends Base {
          * @return \mysqli_result The result of the search
          */
         public function search(string $tablename, string $search, array $columns = ["name"], array $options = []): \mysqli_result {
+            $validatedTable = $this->validateIdentifier($tablename, 'table');
+            $validatedColumns = [];
+            foreach ($columns as $column) {
+                $validatedColumns[] = $this->validateIdentifier($column, 'column');
+            }
 
             # Default options
             $delimiter      = (empty($options["delimiter"]) ? " " : $options["delimiter"]);
@@ -275,7 +280,7 @@ class SQL extends Base {
                 if ($strip_chars === True) {
                     $keyword = preg_replace("/[^a-zA-Z0-9]/", "", $keyword);
                 }
-                foreach ($columns as $column) {
+                foreach ($validatedColumns as $column) {
                     if ($case_sensitive === True) {
                         $conditions[] = "(CASE WHEN REGEXP_REPLACE(`$column`, '[^a-zA-Z0-9]', '') LIKE ? THEN 2 ELSE 0 END)";
                         $searchParams[] = "%".$keyword."%";
@@ -286,7 +291,7 @@ class SQL extends Base {
                 }
             }
             $searchQuery .= implode(" + ", $conditions) . ") AS relevance";
-            $searchQuery .= " FROM $tablename WHERE " . implode(" OR ", $conditions) . " HAVING relevance > 1";
+            $searchQuery .= " FROM `$validatedTable` WHERE " . implode(" OR ", $conditions) . " HAVING relevance > 1";
             $searchQuery .= " ORDER BY relevance DESC";
             if ($limit > 0) {
                 if ($offset > 0) {
@@ -399,4 +404,3 @@ class SQL extends Base {
 
 
     } # END CLASS
-        ?>

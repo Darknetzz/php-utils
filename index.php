@@ -27,22 +27,23 @@ require_once("PHPUtils/_All.php");
             <tbody>
             <?php
                 $classFolder = "PHPUtils";
-                $docsFolder  = "Docs/PHPDocumentor/classes";
-                $testFolder  = "test";
+                $docsFolder  = "Docs/classes";
+                $testFolder  = "tests";
                 $classes = glob($classFolder."/*.php");
                 foreach($classes as $class){
-                    $classPath  = explode("/",$class);
+                    $classPath  = explode("/", str_replace("\\", "/", $class));
                     $className  = end($classPath);
                     $classTitle = str_replace(".php","",$className);
+                    if ($classTitle === "_All") { continue; }
 
-                    $thisDoc  = $docsFolder."/$classTitle.md";
-                    $thisTest = $testFolder."/$classTitle.php";
+                    $thisDoc  = $docsFolder."/".$classTitle.".html";
+                    $testFile = $testFolder."/".$classTitle."Test.php";
 
                     $btnClass = (file_exists($thisDoc) ? "btn btn-sm btn-outline-success" : "btn btn-sm btn-outline-danger");
-                    $docLink  = "<a href='$thisDoc' class='$btnClass' target='_blank'>$thisDoc</a>";
+                    $docLink  = "<a href='$thisDoc' class='$btnClass' target='_blank'>Doc</a>";
 
-                    $btnClass = (file_exists($thisTest) ? "btn btn-sm btn-outline-success" : "btn btn-sm btn-outline-danger");
-                    $testLink = "<a href='$thisTest' class='$btnClass' target='_blank'>$thisTest</a>";
+                    $btnClass = (file_exists($testFile) ? "btn btn-sm btn-outline-success" : "btn btn-sm btn-outline-secondary");
+                    $testLink = "<a href='$testFolder/' class='$btnClass' target='_blank'>Tests</a>";
             
                     echo "
                     <tr>
