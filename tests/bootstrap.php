@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // Bootstrap file for PHPUnit tests - use Composer autoload when available
 $autoload = __DIR__ . '/../vendor/autoload.php';
 if (file_exists($autoload)) {

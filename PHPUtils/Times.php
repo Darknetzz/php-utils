@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PHPUtils;
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -20,9 +22,9 @@ class Times {
      * @param  string $timezone The timezone to return the time in
      * @return string The current time
      */
-    public function getCurrentTime(string $format, string $timezone) : string {
-        $dt = new DateTime('now');
-        $tz = new DateTimeZone($timezone);
+    public function getCurrentTime(string $format, string $timezone): string {
+        $dt = new \DateTime('now');
+        $tz = new \DateTimeZone($timezone);
         $dt->setTimeZone($tz);
         $return = $dt->format($format);
     

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PHPUtils;
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -35,7 +37,14 @@ class Vars {
     /* ───────────────────────────────────────────────────────────────────── */
     /*                             arrayInString                             */
     /* ───────────────────────────────────────────────────────────────────── */
-    public function arrayInString(array $haystack, string $needle) {
+    /**
+     * Check whether any element of the array contains the needle as a substring.
+     *
+     * @param array $haystack Array of strings to search in
+     * @param string $needle Substring to look for
+     * @return bool True if any element contains the needle, false otherwise
+     */
+    public function arrayInString(array $haystack, string $needle): bool {
         foreach ($haystack as $char) {
             if (strpos($char, $needle) !== FALSE) {
                 return true;
@@ -44,6 +53,12 @@ class Vars {
         return false;
     }
 
+    /**
+     * Alias for arrayInString. Returns true if any element of the array contains the needle as a substring.
+     */
+    public function arrayContainsSubstring(array $haystack, string $needle): bool {
+        return $this->arrayInString($haystack, $needle);
+    }
 
     /* ───────────────────────────────────────────────────────────────────── */
     /*                               stringify                               */

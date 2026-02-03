@@ -18,6 +18,11 @@ A comprehensive PHPUnit test suite has been created for the PHPUtils library.
 | StringsTest | 10 | ✅ Passing |
 | NetworkTest | 17 | ✅ Passing |
 | SQLTest | 11 | ⚠️ Requires MySQL |
+| CryptoTest | 7 | ✅ Passing |
+| FilesTest | 5 | ✅ Passing |
+| SQLiteTest | 4 | ✅ Passing |
+| TimesTest | 4 | ✅ Passing |
+| RandomTest | 8 | ✅ Passing |
 
 ## Test Files Created
 
@@ -150,15 +155,31 @@ composer install
 4. **Constants** - SQL constants are tested
 5. **Separation of Concerns** - Debugger's data/HTML separation is tested
 
-## Future Test Additions
+### CryptoTest
+- Hash and verifyhash (correct algorithm order, timing-safe comparison)
+- genIV format
+- Encrypt/decrypt with and without IV
 
-Consider adding tests for:
-- Files class
-- Random class
-- Times class
-- Images class
-- Crypto class
-- Other utility classes
+### FilesTest
+- is_file with existing file, non-existent path, directory
+- file_read with temp file and non-existent file (expects exception)
+
+### SQLiteTest
+- res() structure and defaults
+- clean() strips newlines and encodes
+- sqlite_create_db / sqlite_select_db / sqlite_drop_db with temp path
+
+### TimesTest
+- getCurrentTime format and timezone
+- relativeTime with format and default
+
+### RandomTest
+- array_pick_random, roll (range), percentage (0/50/100), genStr length
+
+## Code Quality
+
+- All library and test files use `declare(strict_types=1);`.
+- Network, Random, Files, and Debugger use exceptions instead of `die()` where appropriate (see CHANGELOG.md).
 
 ## Notes
 

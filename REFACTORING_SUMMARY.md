@@ -1,5 +1,7 @@
 # OOP Refactoring Summary
 
+For the latest improvements (strict types, exceptions, new tests, CI), see [CHANGELOG.md](CHANGELOG.md).
+
 ## Changes Implemented
 
 This document summarizes all the OOP improvements made to the PHPUtils codebase.

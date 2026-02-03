@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PHPUtils\Tests;
 
 use PHPUnit\Framework\TestCase;
@@ -77,17 +79,27 @@ class NetworkTest extends TestCase
         $this->assertEquals('203.0.113.1', $result);
     }
 
-    public function testGetUserIPAsArray()
+    public function testGetUserIPAsArray(): void
     {
         $_SERVER['REMOTE_ADDR'] = '192.168.1.100';
         unset($_SERVER['HTTP_X_FORWARDED_FOR']);
-        
+
         $result = $this->network->getUserIP(null, true);
-        
+
         $this->assertIsArray($result);
         $this->assertArrayHasKey('type', $result);
         $this->assertArrayHasKey('userip', $result);
         $this->assertEquals('direct', $result['type']);
+    }
+
+    public function testGetUserIPThrowsWhenDieIfEmptyAndNoIp(): void
+    {
+        unset($_SERVER['REMOTE_ADDR']);
+        unset($_SERVER['HTTP_X_FORWARDED_FOR']);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('getUserIP');
+        $this->network->getUserIP(null, false, true);
     }
 
     public function testGetServerIP()

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PHPUtils;
 
 /**
@@ -35,15 +37,15 @@ class Images extends Base {
 
     /**
      * Blur an image.
-     * 
+     *
      * @param string $imagePath The path to the image file.
      * @param float $radius The blur radius.
      * @param float $sigma The blur sigma.
-     * @param int $channel The channel(s) to apply the blur to.
+     * @param int $channel The channel(s) to apply the blur to (\Imagick::CHANNEL_*).
      * @return string The path of the blurred image.
-     * @throws ImagickException If an error occurs while blurring the image.
+     * @throws \ImagickException If an error occurs while blurring the image.
      */
-    public function blur(string $imagePath, float $radius = 10, float $sigma = 25, int $channel = imagick::CHANNEL_ALL) {
+    public function blur(string $imagePath, float $radius = 10, float $sigma = 25, int $channel = \Imagick::CHANNEL_ALL): string {
         try {
             // Create a temporary file
             $tmpDir          = dirname($imagePath);

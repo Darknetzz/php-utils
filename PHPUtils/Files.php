@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PHPUtils;
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -258,9 +260,9 @@ class Files extends Base {
 
         # default callback function
         if ($callback == null) {
-            $callback = function() {
+            $callback = function(): never {
                 http_response_code(404);
-                die("404 Not found");
+                throw new \RuntimeException("404 Not found");
             };
         }
 

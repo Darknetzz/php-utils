@@ -1,5 +1,5 @@
 # php-utils
-Disclaimer: This is so early in development it doesn't even have any useful stuff yet. Please come back later.
+General-purpose PHP utility classes. Requires PHP 8.0+.
 
 
     # ────────────────────────────────────────────────────────── #
@@ -72,3 +72,12 @@ API documentation is generated in the `Docs/` folder. Class reference:
 * [Strings](Docs/classes/Strings.html)
 * [Times](Docs/classes/Times.html)
 * [Vars](Docs/classes/Vars.html)
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for recent improvements (strict types, exception-based error handling, new tests, CI).
+
+## Development
+
+- **Tests:** `composer install && vendor/bin/phpunit`
+- **CI:** GitHub Actions run PHPUnit on PHP 8.0–8.4 (see [.github/workflows/php.yml](.github/workflows/php.yml)).

@@ -6,7 +6,6 @@ bin/phpDocumentor.phar
 
 # Composer
 vendor/
-composer.lock
 
 # PHPUnit
 .phpunit.result.cache

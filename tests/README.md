@@ -58,6 +58,21 @@ phpunit
 - Tests user/server IP detection
 - Tests reverse proxy detection
 
+### CryptoTest
+- Hash/verifyhash, genIV, encrypt/decrypt with and without IV
+
+### FilesTest
+- is_file, file_read (including exception for missing file)
+
+### SQLiteTest
+- res(), clean(), sqlite_create_db / select_db / drop_db
+
+### TimesTest
+- getCurrentTime, relativeTime
+
+### RandomTest
+- array_pick_random, roll, percentage, genStr
+
 ## Running Specific Tests
 
 Run a specific test class:
@@ -73,8 +88,10 @@ Run a specific test method:
 ## Test Requirements
 
 - PHP 8.0 or higher
-- PHPUnit 10.0 or higher
-- MySQL server (for SQL tests - some tests are skipped if not available)
+- PHPUnit 10.0 or 11.x
+- Composer (preferred; bootstrap falls back to _All.php if vendor not present)
+- MySQL server (for SQL tests only - those tests are skipped if not available)
+- OpenSSL extension (for Crypto tests)
 
 ## Note on SQL Tests
 

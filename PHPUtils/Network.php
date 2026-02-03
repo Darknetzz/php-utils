@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PHPUtils;
 
 class Network extends Base {
@@ -31,8 +33,7 @@ class Network extends Base {
     $lower_long = ip2long($lowerip);
     $upper_long = ip2long($upperip);
 
-    if (!$ip || !$lower_long || !$upper_long) {
-      echo "ERROR: Function ipInRange requires valid IP addresses. Please check your input.";
+    if ($ip === false || $lower_long === false || $upper_long === false) {
       return null;
     }
 
@@ -61,7 +62,7 @@ class Network extends Base {
     $userip = (!empty($ff)                              ? $ff                              : $ra);
 
     if (empty($userip) && $die_if_empty !== false) {
-      die("getUserIP: Unable to get IP from user.");
+      throw new \RuntimeException("getUserIP: Unable to get IP from user.");
     }
 
     if (!empty($reverse_proxy) && $ra == $reverse_proxy) {
@@ -88,7 +89,7 @@ class Network extends Base {
     $serverip = (!empty($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : null);
 
     if (empty($serverip) && $die_if_empty !== false) {
-      die("getServerIP: Unable to get IP from server.");
+      throw new \RuntimeException("getServerIP: Unable to get IP from server.");
     }
 
     if (empty($serverip) && $die_if_empty === false) {
