@@ -113,7 +113,7 @@ class SQLite extends Base {
                 $tables[] = $row['name'];
             }
             return $this->res("SUCCESS", $tables);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return $this->res("ERROR", $e->getMessage());
         }
     }
@@ -130,7 +130,7 @@ class SQLite extends Base {
     */
     public function sqlite_create_table(\SQLite3 $db, string $table_name, array $columns = ["column_name" => "column_type"]) : array {
         try {
-            if (sqlite_table_exists($db, $table_name)) {
+            if ($this->sqlite_table_exists($db, $table_name)) {
                 return $this->res("ERROR", "Table $table_name already exists.");
             }
             $query = 'CREATE TABLE IF NOT EXISTS "'.$table_name.'" (
@@ -142,7 +142,7 @@ class SQLite extends Base {
             $query = rtrim($query, ', ');
             $query .= ');';
             return $this->res("SUCCESS", $db->query($query));
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return $this->res("ERROR", $e->getMessage());
         }
     }
@@ -158,7 +158,7 @@ class SQLite extends Base {
         try {
             $query = 'DROP TABLE IF EXISTS "'.$table_name.'";';
             return $this->res("SUCCESS", $db->query($query));
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return $this->res("ERROR", $e->getMessage());
         }
     }
@@ -174,7 +174,7 @@ class SQLite extends Base {
         try {
             $query = 'DELETE FROM "'.$table_name.'";';
             return $this->res("SUCCESS", $db->query($query));
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return $this->res("ERROR", $e->getMessage());
         }
     }
@@ -193,7 +193,7 @@ class SQLite extends Base {
             $query = 'SELECT name FROM sqlite_master WHERE type="table" AND name="'.$table_name.'";';
             $result = $db->querySingle($query);
             return $this->res("SUCCESS", ($result === $table_name));
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return $this->res("ERROR", $e->getMessage());
         }
     }
@@ -219,7 +219,7 @@ class SQLite extends Base {
                 ];
             }
             return $this->res("SUCCESS", $columns);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return $this->res("ERROR", $e->getMessage());
         }
     }
@@ -243,7 +243,7 @@ class SQLite extends Base {
                 return $this->res("ERROR", $db->lastErrorMsg());
             }
             return $this->res("SUCCESS", $query);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return $this->res("ERROR", $e->getMessage());
         }
     }
@@ -277,7 +277,7 @@ class SQLite extends Base {
                 return $this->res("ERROR", $db->lastErrorMsg());
             }
             return $this->res("SUCCESS", $insert);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return $this->res("ERROR", $e->getMessage());
         }
     }
@@ -296,7 +296,7 @@ class SQLite extends Base {
     */
     public function sqlite_select(\SQLite3 $db, string $table, array $columns = ["*"], string $where = "", array $params = [], string $order = "", string $limit = "") : array {
         try {
-            if (!sqlite_table_exists($db, $table)) {
+            if (!$this->sqlite_table_exists($db, $table)) {
                 return $this->res("ERROR", "Table $table does not exist.");
             }
             $columns = implode(', ', $columns);
@@ -324,7 +324,7 @@ class SQLite extends Base {
                 return $this->res("ERROR", "No columns returned.");
             }
             return $this->res("SUCCESS", $result);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return $this->res("ERROR", $e->getMessage());
         }
     }
@@ -365,7 +365,7 @@ class SQLite extends Base {
             
             $stmt->execute();
             return $this->res("SUCCESS", $stmt->changes > 0);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return $this->res("ERROR", $e->getMessage());
         }
     }
@@ -394,7 +394,7 @@ class SQLite extends Base {
             
             $stmt->execute();
             return $this->res("SUCCESS", $stmt->changes > 0);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return $this->res("ERROR", $e->getMessage());
         }
     }
@@ -425,20 +425,7 @@ class SQLite extends Base {
             }
             $call        = call_user_func($func_name, ...$params);
             return $this->res($call["status"], $call["data"]);
-            $call_status = $call["status"];
-            $call_data   = $call["data"];
-            if (is_string($call_data)) {
-                $call_data = clean($call_data);
-            }
-            if ($call_status == "ERROR") {
-                return $this->res("ERROR", $call_data);
-            }
-            if ($call_data["status"] == "ERROR") {
-                return $this->res("ERROR", $call_data);
-            }
-            return $this->res($call_status, $call_data);
-
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return $this->res("ERROR", $e->getMessage());
         }
     }

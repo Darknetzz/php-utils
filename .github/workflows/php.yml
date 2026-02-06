@@ -20,7 +20,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: mbstring, openssl
+          extensions: mbstring, openssl, imagick
           coverage: none
 
       - name: Get Composer cache directory

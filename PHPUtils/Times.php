@@ -42,9 +42,9 @@ class Times {
      * @return string The relative time
      */
     public function relativeTime($time, $format = null) {
-        $now      = new \DateTime('now');
-        $then     = new \DateTime($time);
-        $diff     = $now->diff($then);
+        $currentTime = new \DateTime('now');
+        $inputTime   = new \DateTime($time);
+        $diff        = $currentTime->diff($inputTime);
 
         # Translate the format
         $formats = [
