@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PHPUtils;
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -13,70 +15,85 @@ namespace PHPUtils;
  * @package PHPUtils
  */
 class Crypto extends Base {
-    
+
     /**
-     * Generates a random IV for the given encryption method
+     * Generates a random IV for the given encryption method (hex-encoded for storage).
      *
-     * @param mixed $method The encryption method to use
-     * @return string The generated IV
+     * @param string $method The encryption method to use
+     * @return string The generated IV as hex string
      */
-    function genIV(string $method) {
+    public function genIV(string $method): string {
         $len   = openssl_cipher_iv_length($method);
         $bytes = openssl_random_pseudo_bytes($len);
         return bin2hex($bytes);
     }
 
     /**
-     * Encrypt a string using a password, and optionally an IV
+     * Encrypt a string using a password, and optionally an IV.
+     * When $iv is true, a random IV is used and prepended to the ciphertext (base64(iv_raw . ciphertext)).
      *
-     * @param  mixed $str The string to encrypt
-     * @param  mixed $password The password to use
-     * @param  mixed $method The encryption method to use. Defaults to aes-256-cbc
-     * @param  mixed $iv Whether to use an IV or not. Defaults to false
-     * @return string The encrypted string
+     * @param string $str The string to encrypt
+     * @param string $password The password to use
+     * @param string $method The encryption method. Defaults to aes-256-cbc
+     * @param bool $iv Whether to use a random IV (prepended to output). Defaults to false
+     * @return string The encrypted string (when iv=true, base64 of IV + ciphertext)
      */
-     function encryptwithpw(string $str, string $password, string $method = 'aes-256-cbc', bool $iv = false) {
-        $iv = ($iv ? $this->genIV($method) : '');
-        return openssl_encrypt($str,$method,$password,iv:$iv);
-    }
-
-
-    /**
-     * Decrypt a string using a password, and optionally an IV
-     *
-     * @param  mixed $str The string to decrypt
-     * @param  mixed $password The password to use
-     * @param  mixed $method The encryption method to use. Defaults to aes-256-cbc
-     * @param  mixed $iv Whether to use an IV or not. Defaults to ''
-     * @return string The decrypted string
-     */
-    function decryptwithpw(string $str, string $password, string $method = 'aes-256-cbc', string $iv = '') {
-        return openssl_decrypt($str,$method,$password,iv:$iv);
+    public function encryptwithpw(string $str, string $password, string $method = 'aes-256-cbc', bool $iv = false): string {
+        if ($iv) {
+            $ivRaw = hex2bin($this->genIV($method));
+            $encrypted = openssl_encrypt($str, $method, $password, iv: $ivRaw);
+            return base64_encode($ivRaw . $encrypted);
+        }
+        return openssl_encrypt($str, $method, $password);
     }
 
     /**
-     * hash
+     * Decrypt a string using a password, and optionally an IV.
+     * When $iv is empty and the string was produced with iv=true, the embedded IV is used.
+     * When $iv is non-empty, it is treated as hex and used as the IV (ciphertext only in $str).
      *
-     * @param  mixed $str The string to hash
-     * @param  mixed $hash The hash method to use. Defaults to sha512
+     * @param string $str The string to decrypt (base64 when IV was embedded, or raw/base64 ciphertext when $iv provided)
+     * @param string $password The password to use
+     * @param string $method The encryption method. Defaults to aes-256-cbc
+     * @param string $iv Optional hex-encoded IV when not embedded. Defaults to ''
+     * @return string|false The decrypted string or false on failure
+     */
+    public function decryptwithpw(string $str, string $password, string $method = 'aes-256-cbc', string $iv = ''): string|false {
+        $ivLen = openssl_cipher_iv_length($method);
+        if ($iv !== '') {
+            $ivRaw = hex2bin($iv);
+            $ciphertext = base64_decode($str, true) ?: $str;
+            return openssl_decrypt($ciphertext, $method, $password, iv: $ivRaw);
+        }
+        $decoded = base64_decode($str, true);
+        if ($decoded !== false && strlen($decoded) > $ivLen) {
+            $ivRaw = substr($decoded, 0, $ivLen);
+            $ciphertext = substr($decoded, $ivLen);
+            return openssl_decrypt($ciphertext, $method, $password, iv: $ivRaw);
+        }
+        return openssl_decrypt($str, $method, $password);
+    }
+
+    /**
+     * Hash a string using the given algorithm.
+     *
+     * @param string $str The string to hash
+     * @param string $hash The hash algorithm. Defaults to sha512
      * @return string The hashed string
      */
-    function hash(string $str, string $hash = 'sha512') {
-        return hash($str, $hash);
+    public function hash(string $str, string $hash = 'sha512'): string {
+        return hash($hash, $str);
     }
 
     /**
-     * verifyhash
-     * 
-     * Verifies a hash
-     * 
-     * @param  mixed $str The string to verify
-     * @param  mixed $hash The hash to verify against
-     * @param  mixed $hashmethod The hash method to use. Defaults to sha512
-     * 
-     * @return bool Whether the hash is valid or not
+     * Verify a string against a hash (timing-safe comparison).
+     *
+     * @param string $str The string to verify
+     * @param string $hash The hash to verify against
+     * @param string $hashmethod The hash method. Defaults to sha512
+     * @return bool Whether the hash is valid
      */
-    function verifyhash(string $str, string $hash, string $hashmethod = 'sha512') {
-        return hash($hashmethod, $str) == $hash;
+    public function verifyhash(string $str, string $hash, string $hashmethod = 'sha512'): bool {
+        return hash_equals($hash, hash($hashmethod, $str));
     }
 }

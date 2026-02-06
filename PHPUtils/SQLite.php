@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PHPUtils;
 
 /* ───────────────────────────────────────────────────────────────────── */
@@ -14,12 +16,12 @@ namespace PHPUtils;
  */
 class SQLite extends Base {
 
-    function __construct() {
-        # TODO: Create a __construct class
+    public function __construct(?Debugger $debugger = null, ?Vars $vars = null, bool $verbose = true) {
+        parent::__construct($debugger, $vars, $verbose);
     }
 
     # FUNCTION: clean
-    function clean($string) {
+    public function clean($string) {
         $find    = ["\n", "\r"];
         $replace = "";
         $string  = str_replace($find, $replace, $string);
@@ -27,7 +29,7 @@ class SQLite extends Base {
     }
 
     # FUNCTION: res
-    function res(string $status = "UNKNOWN", mixed $data = "No data.") : array {
+    public function res(string $status = "UNKNOWN", mixed $data = "No data."): array {
         return [
             "status"    => $status,
             "data"      => $data,
@@ -36,43 +38,43 @@ class SQLite extends Base {
     }
 
     # FUNCTION: sqlite_create_db
-    function sqlite_create_db(string $dbname = 'database') : array {
+    public function sqlite_create_db(string $dbname = 'database') : array {
         // Create a new database, if the file doesn't exist and open it for reading/writing.
         // The extension of the file is arbitrary.
         if (!is_writable(dirname($dbname.'.sqlite'))) {
-            return res("ERROR", "The directory is not writable.");
+            return $this->res("ERROR", "The directory is not writable.");
         }
         // if (file_exists($dbname.'.sqlite')) {
-        //     return res("ERROR", "The database already exists.");
+        //     return $this->res("ERROR", "The database already exists.");
         // }
-        $db = new SQLite3($dbname.'.sqlite', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
+        $db = new \SQLite3($dbname.'.sqlite', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
         $db->enableExceptions(true);
-        return res("SUCCESS", $db);
+        return $this->res("SUCCESS", $db);
     }
 
     # FUNCTION: sqlite_select_db
-    function sqlite_select_db(string $dbname = 'database') : array {
+    public function sqlite_select_db(string $dbname = 'database') : array {
         // Open an existing database for reading/writing.
         if (!file_exists($dbname.'.sqlite')) {
-            return res("ERROR", "The database does not exist.");
+            return $this->res("ERROR", "The database does not exist.");
         }
-        $db = new SQLite3($dbname.'.sqlite', SQLITE3_OPEN_READWRITE);
+        $db = new \SQLite3($dbname.'.sqlite', SQLITE3_OPEN_READWRITE);
         // Errors are emitted as warnings by default, enable proper error handling.
         $db->enableExceptions(true);
-        return res("SUCCESS", $db);
+        return $this->res("SUCCESS", $db);
     }
 
     # FUNCTION: sqlite_drop_db
-    function sqlite_drop_db(string $dbname = 'database') : array {
+    public function sqlite_drop_db(string $dbname = 'database') : array {
         // Delete the database file.
         if (!file_exists($dbname.'.sqlite')) {
-            return res("ERROR", "The database does not exist.");
+            return $this->res("ERROR", "The database does not exist.");
         }
         if (!is_writable($dbname.'.sqlite')) {
-            return res("ERROR", "The database is not writable.");
+            return $this->res("ERROR", "The database is not writable.");
         }
         $result = unlink($dbname.'.sqlite');
-        return res("SUCCESS", $result);
+        return $this->res("SUCCESS", $result);
     }
 
     # FUNCTION: sqlite_get_dbs
@@ -83,7 +85,7 @@ class SQLite extends Base {
     * 
     * @return array An array of database names.
     */
-    function sqlite_get_dbs(string $dir = '.') : array {
+    public function sqlite_get_dbs(string $dir = '.') : array {
         $dbs = [];
         $files = scandir($dir);
         foreach ($files as $file) {
@@ -91,18 +93,18 @@ class SQLite extends Base {
                 $dbs[] = pathinfo($file, PATHINFO_FILENAME);
             }
         }
-        return res("SUCCESS", $dbs);
+        return $this->res("SUCCESS", $dbs);
     }
 
     # FUNCTION: sqlite_get_tables
     /**
     * Get a list of tables in the database.
     * 
-    * @param SQLite3 $db The database connection.
+    * @param \SQLite3 $db The database connection.
     * 
     * @return array An array of table names.
     */
-    function sqlite_get_tables(SQLite3 $db) : array {
+    public function sqlite_get_tables(\SQLite3 $db) : array {
         try {
             $query = 'SELECT name FROM sqlite_master WHERE type="table";';
             $result = $db->query($query);
@@ -110,9 +112,9 @@ class SQLite extends Base {
             while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
                 $tables[] = $row['name'];
             }
-            return res("SUCCESS", $tables);
+            return $this->res("SUCCESS", $tables);
         } catch (Exception $e) {
-            return res("ERROR", $e->getMessage());
+            return $this->res("ERROR", $e->getMessage());
         }
     }
 
@@ -120,16 +122,16 @@ class SQLite extends Base {
     /**
     * Create a table in the database.
     * 
-    * @param SQLite3 $db The database connection.
+    * @param \SQLite3 $db The database connection.
     * @param string $table_name The name of the table.
     * @param array $columns An associative array of column names and types. The key is the column name, the value is the column type.
     *              Example: ["column_name" => "column_type"]
     *              You don't need to specify the "id" column, it's automatically created as an INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL.
     */
-    function sqlite_create_table(SQLite3 $db, string $table_name, array $columns = ["column_name" => "column_type"]) : array {
+    public function sqlite_create_table(\SQLite3 $db, string $table_name, array $columns = ["column_name" => "column_type"]) : array {
         try {
             if (sqlite_table_exists($db, $table_name)) {
-                return res("ERROR", "Table $table_name already exists.");
+                return $this->res("ERROR", "Table $table_name already exists.");
             }
             $query = 'CREATE TABLE IF NOT EXISTS "'.$table_name.'" (
                 "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -139,9 +141,9 @@ class SQLite extends Base {
             }
             $query = rtrim($query, ', ');
             $query .= ');';
-            return res("SUCCESS", $db->query($query));
+            return $this->res("SUCCESS", $db->query($query));
         } catch (Exception $e) {
-            return res("ERROR", $e->getMessage());
+            return $this->res("ERROR", $e->getMessage());
         }
     }
 
@@ -149,15 +151,15 @@ class SQLite extends Base {
     /**
     * Drop a table from the database.
     * 
-    * @param SQLite3 $db The database connection.
+    * @param \SQLite3 $db The database connection.
     * @param string $table_name The name of the table.
     */
-    function sqlite_drop_table(SQLite3 $db, string $table_name) : array {
+    public function sqlite_drop_table(\SQLite3 $db, string $table_name) : array {
         try {
             $query = 'DROP TABLE IF EXISTS "'.$table_name.'";';
-            return res("SUCCESS", $db->query($query));
+            return $this->res("SUCCESS", $db->query($query));
         } catch (Exception $e) {
-            return res("ERROR", $e->getMessage());
+            return $this->res("ERROR", $e->getMessage());
         }
     }
 
@@ -165,15 +167,15 @@ class SQLite extends Base {
     /**
     * Empty a table in the database.
     * 
-    * @param SQLite3 $db The database connection.
+    * @param \SQLite3 $db The database connection.
     * @param string $table_name The name of the table.
     */
-    function sqlite_empty_table(SQLite3 $db, string $table_name) : array {
+    public function sqlite_empty_table(\SQLite3 $db, string $table_name) : array {
         try {
             $query = 'DELETE FROM "'.$table_name.'";';
-            return res("SUCCESS", $db->query($query));
+            return $this->res("SUCCESS", $db->query($query));
         } catch (Exception $e) {
-            return res("ERROR", $e->getMessage());
+            return $this->res("ERROR", $e->getMessage());
         }
     }
 
@@ -181,18 +183,18 @@ class SQLite extends Base {
     /**
     * Check if a table exists in the database.
     * 
-    * @param SQLite3 $db The database connection.
+    * @param \SQLite3 $db The database connection.
     * @param string $table_name The name of the table.
     * 
     * @return bool TRUE if the table exists, FALSE if it doesn't.
     */
-    function sqlite_table_exists(SQLite3 $db, string $table_name) : array {
+    public function sqlite_table_exists(\SQLite3 $db, string $table_name) : array {
         try {
             $query = 'SELECT name FROM sqlite_master WHERE type="table" AND name="'.$table_name.'";';
             $result = $db->querySingle($query);
-            return res("SUCCESS", ($result === $table_name));
+            return $this->res("SUCCESS", ($result === $table_name));
         } catch (Exception $e) {
-            return res("ERROR", $e->getMessage());
+            return $this->res("ERROR", $e->getMessage());
         }
     }
 
@@ -200,12 +202,12 @@ class SQLite extends Base {
     /**
     * Get a list of columns in a table.
     * 
-    * @param SQLite3 $db The database connection.
+    * @param \SQLite3 $db The database connection.
     * @param string $table_name The name of the table.
     * 
     * @return array An array of column names.
     */
-    function sqlite_get_columns(SQLite3 $db, string $table_name) : array {
+    public function sqlite_get_columns(\SQLite3 $db, string $table_name) : array {
         try {
             $query = 'PRAGMA table_info("'.$table_name.'");';
             $result = $db->query($query);
@@ -216,9 +218,9 @@ class SQLite extends Base {
                     "type" => $row['type'],
                 ];
             }
-            return res("SUCCESS", $columns);
+            return $this->res("SUCCESS", $columns);
         } catch (Exception $e) {
-            return res("ERROR", $e->getMessage());
+            return $this->res("ERROR", $e->getMessage());
         }
     }
 
@@ -226,23 +228,23 @@ class SQLite extends Base {
     /**
     * Execute a query.
     * 
-    * @param SQLite3 $db The database connection.
+    * @param \SQLite3 $db The database connection.
     * @param string $query The query to execute.
     */
-    function sqlite_query(?SQLite3 $db, $query) : array {
+    public function sqlite_query(?\SQLite3 $db, $query) : array {
         try {
             if (!$db) {
-                return res("ERROR", "Database connection not found.");
+                return $this->res("ERROR", "Database connection not found.");
             }
             // $start  = $db->exec('BEGIN');
             $query  = $db->query($query);
             // $commit = $db->exec('COMMIT');
             if ($query === false) {
-                return res("ERROR", $db->lastErrorMsg());
+                return $this->res("ERROR", $db->lastErrorMsg());
             }
-            return res("SUCCESS", $query);
+            return $this->res("SUCCESS", $query);
         } catch (Exception $e) {
-            return res("ERROR", $e->getMessage());
+            return $this->res("ERROR", $e->getMessage());
         }
     }
 
@@ -250,14 +252,14 @@ class SQLite extends Base {
     /**
     * Insert data into a table.
     * 
-    * @param SQLite3 $db The database connection.
+    * @param \SQLite3 $db The database connection.
     * @param string $table The name of the table.
     * @param array $data An associative array of column names and values. The key is the column name, the value is the value to insert.
     *              Example: ["column_name" => "value"]
     * 
     * @return bool TRUE on success, FALSE on failure.
     */
-    function sqlite_insert(SQLite3 $db, string $table, array $data) : array {
+    public function sqlite_insert(\SQLite3 $db, string $table, array $data) : array {
         try {
             $columns = implode(', ', array_keys($data));
             $placeholders = implode(', ', array_fill(0, count($data), '?'));
@@ -272,11 +274,11 @@ class SQLite extends Base {
             
             $insert = $stmt->execute();
             if ($insert === false) {
-                return res("ERROR", $db->lastErrorMsg());
+                return $this->res("ERROR", $db->lastErrorMsg());
             }
-            return res("SUCCESS", $insert);
+            return $this->res("SUCCESS", $insert);
         } catch (Exception $e) {
-            return res("ERROR", $e->getMessage());
+            return $this->res("ERROR", $e->getMessage());
         }
     }
 
@@ -284,7 +286,7 @@ class SQLite extends Base {
     /**
     * Select data from a table.
     * 
-    * @param SQLite3 $db The database connection.
+    * @param \SQLite3 $db The database connection.
     * @param string $table The name of the table.
     * @param array $columns An array of column names to select.
     * @param string $where The WHERE clause.
@@ -292,10 +294,10 @@ class SQLite extends Base {
     * @param string $order The ORDER BY clause.
     * @param string $limit The LIMIT clause.
     */
-    function sqlite_select(SQLite3 $db, string $table, array $columns = ["*"], string $where = "", array $params = [], string $order = "", string $limit = "") : array {
+    public function sqlite_select(\SQLite3 $db, string $table, array $columns = ["*"], string $where = "", array $params = [], string $order = "", string $limit = "") : array {
         try {
             if (!sqlite_table_exists($db, $table)) {
-                return res("ERROR", "Table $table does not exist.");
+                return $this->res("ERROR", "Table $table does not exist.");
             }
             $columns = implode(', ', $columns);
             $query = "SELECT $columns FROM $table";
@@ -316,14 +318,14 @@ class SQLite extends Base {
             
             $result = $stmt->execute();
             if ($result === false) {
-                return res("ERROR", $db->lastErrorMsg());
+                return $this->res("ERROR", $db->lastErrorMsg());
             }
             if ($result->numColumns() == 0) {
-                return res("ERROR", "No columns returned.");
+                return $this->res("ERROR", "No columns returned.");
             }
-            return res("SUCCESS", $result);
+            return $this->res("SUCCESS", $result);
         } catch (Exception $e) {
-            return res("ERROR", $e->getMessage());
+            return $this->res("ERROR", $e->getMessage());
         }
     }
 
@@ -331,7 +333,7 @@ class SQLite extends Base {
     /**
     * Update data in a table.
     * 
-    * @param SQLite3 $db The database connection.
+    * @param \SQLite3 $db The database connection.
     * @param string $table The name of the table.
     * @param array $data An associative array of column names and values. The key is the column name, the value is the value to update.
     *              Example: ["column_name" => "value"]
@@ -340,7 +342,7 @@ class SQLite extends Base {
     * 
     * @return bool TRUE on success, FALSE on failure.
     */
-    function sqlite_update(SQLite3 $db, string $table, array $data, string $where, array $params) : array {
+    public function sqlite_update(\SQLite3 $db, string $table, array $data, string $where, array $params) : array {
         try {
             $set = "";
             foreach ($data as $column => $value) {
@@ -362,9 +364,9 @@ class SQLite extends Base {
             }
             
             $stmt->execute();
-            return res("SUCCESS", $stmt->changes > 0);
+            return $this->res("SUCCESS", $stmt->changes > 0);
         } catch (Exception $e) {
-            return res("ERROR", $e->getMessage());
+            return $this->res("ERROR", $e->getMessage());
         }
     }
 
@@ -372,14 +374,14 @@ class SQLite extends Base {
     /**
     * Delete data from a table.
     * 
-    * @param SQLite3 $db The database connection.
+    * @param \SQLite3 $db The database connection.
     * @param string $table The name of the table.
     * @param string $where The WHERE clause.
     * @param array $params An array of parameters to bind to the WHERE clause.
     * 
     * @return bool TRUE on success, FALSE on failure.
     */
-    function sqlite_delete(SQLite3 $db, string $table, string $where, array $params) : array {
+    public function sqlite_delete(\SQLite3 $db, string $table, string $where, array $params) : array {
         try {
             $query = "DELETE FROM $table WHERE $where";
         
@@ -391,9 +393,9 @@ class SQLite extends Base {
             }
             
             $stmt->execute();
-            return res("SUCCESS", $stmt->changes > 0);
+            return $this->res("SUCCESS", $stmt->changes > 0);
         } catch (Exception $e) {
-            return res("ERROR", $e->getMessage());
+            return $this->res("ERROR", $e->getMessage());
         }
     }
 
@@ -401,11 +403,11 @@ class SQLite extends Base {
     /**
     * Get the SQLite version.
     */
-    function sqlite_version($filter = Null) : array {
+    public function sqlite_version($filter = Null) : array {
         if ($filter) {
-            return res("SUCCESS", !empty(SQLite3::version()[$filter]) ? SQLite3::version()[$filter] : "Unknown");
+            return $this->res("SUCCESS", !empty(\SQLite3::version()[$filter]) ? \SQLite3::version()[$filter] : "Unknown");
         }
-        return res("SUCCESS", json_encode(SQLite3::version()));
+        return $this->res("SUCCESS", json_encode(\SQLite3::version()));
     }
 
     # FUNCTION: sqlite_function
@@ -415,29 +417,29 @@ class SQLite extends Base {
     * @param func_name The sqlite_* function to run.
     * @param params The parameters to pass to the function.
     */
-    function sqlite_function($func_name, ...$params) : array {
+    public function sqlite_function($func_name, ...$params) : array {
         try {
             $func_name = "sqlite_".str_replace("sqlite_", "", $func_name);
             if (!function_exists($func_name)) {
-                return res("ERROR", "Function $func_name does not exist.");
+                return $this->res("ERROR", "Function $func_name does not exist.");
             }
             $call        = call_user_func($func_name, ...$params);
-            return res($call["status"], $call["data"]);
+            return $this->res($call["status"], $call["data"]);
             $call_status = $call["status"];
             $call_data   = $call["data"];
             if (is_string($call_data)) {
                 $call_data = clean($call_data);
             }
             if ($call_status == "ERROR") {
-                return res("ERROR", $call_data);
+                return $this->res("ERROR", $call_data);
             }
             if ($call_data["status"] == "ERROR") {
-                return res("ERROR", $call_data);
+                return $this->res("ERROR", $call_data);
             }
-            return res($call_status, $call_data);
+            return $this->res($call_status, $call_data);
 
         } catch (Exception $e) {
-            return res("ERROR", $e->getMessage());
+            return $this->res("ERROR", $e->getMessage());
         }
     }
 

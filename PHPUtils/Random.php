@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PHPUtils;
 
 /**
@@ -65,7 +67,7 @@ class Random extends Base {
         foreach ($requiredTypes as $type) {
 
             if (empty($str[$type])) {
-                die(__METHOD__ . ": Invalid type: $type");
+                throw new \InvalidArgumentException(__METHOD__ . ": Invalid type: $type");
             }
 
             if (in_array($type, $required) && strpos($returnValue, implode('', $str[$type])) !== False) {

@@ -1,11 +1,12 @@
-
 <?php
+
+declare(strict_types=1);
 
 # ──────────────────────────────────────────────────────────────────────────────────────────────── #
 #                                          INITIAL CHECKS                                          #
 # ──────────────────────────────────────────────────────────────────────────────────────────────── #
 if (PHP_MAJOR_VERSION < 8) {
-    die("PHPUtils requires PHP > 8 in order to work.");
+    die("PHPUtils requires PHP 8.0 or later.");
 }
 
 

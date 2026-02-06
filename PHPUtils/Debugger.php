@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace PHPUtils;
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -130,11 +132,13 @@ class Debugger {
      * @param  mixed $die
      * @return void
      */
-    public function output(mixed $txt, string $type = 'info', bool $die = false) {
+    public function output(mixed $txt, string $type = 'info', bool $die = false): void {
+        $formatted = $this->format($txt, $type);
         if ($die) {
-            die($this->format($txt, $type));
+            echo $formatted;
+            throw new \RuntimeException("Debugger::output terminated with die=true.");
         }
-        echo $this->format($txt, $type);
+        echo $formatted;
     }
 
 

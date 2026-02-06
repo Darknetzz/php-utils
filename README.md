@@ -1,5 +1,5 @@
 # php-utils
-Disclaimer: This is so early in development it doesn't even have any useful stuff yet. Please come back later.
+General-purpose PHP utility classes. Requires PHP 8.0+.
 
 
     # ────────────────────────────────────────────────────────── #
@@ -28,32 +28,56 @@ Simply open your PHP project and clone this repo.
 git clone git@github.com:Darknetzz/php-utils.git
 ```
 
-Then include the `_All.php` if you want to be able to use anything from this library on demand.
-```php
-include_once("php-utils/_All.php");
+Then include the library. You can use Composer autoload (recommended) or `_All.php`:
 
-# Then you can instantiate any of the classes and start using them.
-$crypto = new Crypto;
+**Using Composer (recommended):**
+```bash
+composer require darknetzz/php-utils
+```
+```php
+require_once __DIR__ . '/vendor/autoload.php';
+
+use PHPUtils\Crypto;
+$crypto = new Crypto();
+$hashedPassword = $crypto->hash("MyPassword123");
+```
+
+**Using _All.php (e.g. when cloned as a subfolder):**
+```php
+include_once("php-utils/PHPUtils/_All.php");  // adjust path if your folder name differs
+
+use PHPUtils\Crypto;
+$crypto = new Crypto();
 $hashedPassword = $crypto->hash("MyPassword123");
 ```
 
 # Modules
-Here is a list of all the modules (classes) and their methods.
+API documentation is generated in the `Docs/` folder. Class reference:
 
-* [API](Docs/API.md)
-* [Auth](Docs/Auth.md)
-* [Calendar](Docs/Calendar.md)
-* [Crypto](Docs/Crypto.md)
-* [Debugger](Docs/Debugger.md)
-* [Files](Docs/Files.md)
-* [Funcs](Docs/Funcs.md)
-* [Images](Docs/Images.md)
-* [Navigation](Docs/Navigation.md)
-* [Network](Docs/Network.md)
-* [Random](Docs/Random.md)
-* [Resources](Docs/Resources.md)
-* [Session](Docs/Session.md)
-* [SQL](Docs/SQL.md)
-* [Strings](Docs/Strings.md)
-* [Times](Docs/Times.md)
-* [Vars](Docs/Vars.md)
+* [API](Docs/classes/API.html)
+* [Auth](Docs/classes/Auth.html)
+* [Calendar](Docs/classes/Calendar.html)
+* [Crypto](Docs/classes/Crypto.html)
+* [Debugger](Docs/classes/Debugger.html)
+* [Files](Docs/classes/Files.html)
+* [Funcs](Docs/classes/Funcs.html)
+* [Images](Docs/classes/Images.html)
+* [Navigation](Docs/classes/Navigation.html)
+* [Network](Docs/classes/Network.html)
+* [Random](Docs/classes/Random.html)
+* [Resources](Docs/classes/Resources.html)
+* [Session](Docs/classes/Session.html)
+* [SQL](Docs/classes/SQL.html)
+* [SQLite](Docs/classes/SQLite.html)
+* [Strings](Docs/classes/Strings.html)
+* [Times](Docs/classes/Times.html)
+* [Vars](Docs/classes/Vars.html)
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for recent improvements (strict types, exception-based error handling, new tests, CI).
+
+## Development
+
+- **Tests:** `composer install && vendor/bin/phpunit`
+- **CI:** GitHub Actions run PHPUnit on PHP 8.0–8.4 (see [.github/workflows/php.yml](.github/workflows/php.yml)).
