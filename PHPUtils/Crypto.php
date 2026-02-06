@@ -41,7 +41,7 @@ class Crypto extends Base {
     public function encryptwithpw(string $str, string $password, string $method = 'aes-256-cbc', bool $iv = false): string {
         if ($iv) {
             $ivRaw = hex2bin($this->genIV($method));
-            $encrypted = openssl_encrypt($str, $method, $password, iv: $ivRaw);
+            $encrypted = openssl_encrypt($str, $method, $password, OPENSSL_RAW_DATA, $ivRaw);
             return base64_encode($ivRaw . $encrypted);
         }
         return openssl_encrypt($str, $method, $password);
@@ -63,13 +63,13 @@ class Crypto extends Base {
         if ($iv !== '') {
             $ivRaw = hex2bin($iv);
             $ciphertext = base64_decode($str, true) ?: $str;
-            return openssl_decrypt($ciphertext, $method, $password, iv: $ivRaw);
+            return openssl_decrypt($ciphertext, $method, $password, OPENSSL_RAW_DATA, $ivRaw);
         }
         $decoded = base64_decode($str, true);
         if ($decoded !== false && strlen($decoded) > $ivLen) {
             $ivRaw = substr($decoded, 0, $ivLen);
             $ciphertext = substr($decoded, $ivLen);
-            return openssl_decrypt($ciphertext, $method, $password, iv: $ivRaw);
+            return openssl_decrypt($ciphertext, $method, $password, OPENSSL_RAW_DATA, $ivRaw);
         }
         return openssl_decrypt($str, $method, $password);
     }
