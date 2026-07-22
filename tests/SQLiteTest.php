@@ -19,24 +19,6 @@ class SQLiteTest extends TestCase
         $this->sqlite = new SQLite();
     }
 
-    public function testResReturnsArrayWithStatusAndData(): void
-    {
-        $result = $this->sqlite->res('SUCCESS', 'test data');
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('status', $result);
-        $this->assertArrayHasKey('data', $result);
-        $this->assertArrayHasKey('data_type', $result);
-        $this->assertEquals('SUCCESS', $result['status']);
-        $this->assertEquals('test data', $result['data']);
-    }
-
-    public function testResDefaultValues(): void
-    {
-        $result = $this->sqlite->res();
-        $this->assertEquals('UNKNOWN', $result['status']);
-        $this->assertEquals('No data.', $result['data']);
-    }
-
     public function testCleanStripsNewlinesAndEncodes(): void
     {
         $input = "  hello\n\rworld  ";
@@ -46,18 +28,104 @@ class SQLiteTest extends TestCase
         $this->assertNotEmpty($result);
     }
 
-    public function testSqliteCreateDbAndSelectDb(): void
+    public function testSqliteCreateSelectAndDropDb(): void
     {
         $tmpDir = sys_get_temp_dir();
         $dbname = $tmpDir . '/phputils_sqlite_test_' . uniqid();
-        $create = $this->sqlite->sqlite_create_db($dbname);
-        $this->assertEquals('SUCCESS', $create['status']);
-        $this->assertInstanceOf(\SQLite3::class, $create['data']);
 
-        $select = $this->sqlite->sqlite_select_db($dbname);
-        $this->assertEquals('SUCCESS', $select['status']);
+        $db = $this->sqlite->sqlite_create_db($dbname);
+        $this->assertInstanceOf(\SQLite3::class, $db);
+        $db->close();
 
-        $drop = $this->sqlite->sqlite_drop_db($dbname);
-        $this->assertEquals('SUCCESS', $drop['status']);
+        $selected = $this->sqlite->sqlite_select_db($dbname);
+        $this->assertInstanceOf(\SQLite3::class, $selected);
+        $selected->close();
+
+        $this->assertTrue($this->sqlite->sqlite_drop_db($dbname));
+    }
+
+    public function testSqliteSelectDbThrowsWhenMissing(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->sqlite->sqlite_select_db(sys_get_temp_dir() . '/phputils_missing_' . uniqid());
+    }
+
+    public function testSqliteTableLifecycle(): void
+    {
+        $tmpDir = sys_get_temp_dir();
+        $dbname = $tmpDir . '/phputils_sqlite_table_' . uniqid();
+        $db = $this->sqlite->sqlite_create_db($dbname);
+
+        try {
+            $this->assertFalse($this->sqlite->sqlite_table_exists($db, 'items'));
+
+            $this->sqlite->sqlite_create_table($db, 'items', [
+                'name' => 'TEXT',
+                'qty' => 'INTEGER',
+            ]);
+            $this->assertTrue($this->sqlite->sqlite_table_exists($db, 'items'));
+
+            $this->sqlite->sqlite_insert($db, 'items', ['name' => 'widget', 'qty' => 3]);
+            $result = $this->sqlite->sqlite_select($db, 'items');
+            $row = $result->fetchArray(SQLITE3_ASSOC);
+            $this->assertSame('widget', $row['name']);
+            $this->assertSame(3, $row['qty']);
+            $result->finalize();
+
+            $this->assertTrue($this->sqlite->sqlite_update($db, 'items', ['qty' => 5], 'name = ?', ['widget']));
+            $this->assertTrue($this->sqlite->sqlite_delete($db, 'items', 'name = ?', ['widget']));
+
+            $tables = $this->sqlite->sqlite_get_tables($db);
+            $this->assertContains('items', $tables);
+
+            $columns = $this->sqlite->sqlite_get_columns($db, 'items');
+            $names = array_column($columns, 'name');
+            $this->assertContains('id', $names);
+            $this->assertContains('name', $names);
+
+            $this->sqlite->sqlite_drop_table($db, 'items');
+            $this->assertFalse($this->sqlite->sqlite_table_exists($db, 'items'));
+        } finally {
+            $db->close();
+            $this->sqlite->sqlite_drop_db($dbname);
+        }
+    }
+
+    public function testSqliteCreateTableThrowsIfExists(): void
+    {
+        $tmpDir = sys_get_temp_dir();
+        $dbname = $tmpDir . '/phputils_sqlite_dup_' . uniqid();
+        $db = $this->sqlite->sqlite_create_db($dbname);
+
+        try {
+            $this->sqlite->sqlite_create_table($db, 'dup', ['x' => 'TEXT']);
+            $this->expectException(\RuntimeException::class);
+            $this->sqlite->sqlite_create_table($db, 'dup', ['x' => 'TEXT']);
+        } finally {
+            $db->close();
+            if (file_exists($dbname . '.sqlite')) {
+                $this->sqlite->sqlite_drop_db($dbname);
+            }
+        }
+    }
+
+    public function testSqliteVersion(): void
+    {
+        $version = $this->sqlite->sqlite_version();
+        $this->assertIsArray($version);
+        $this->assertArrayHasKey('versionString', $version);
+        $this->assertIsString($this->sqlite->sqlite_version('versionString'));
+    }
+
+    public function testSqliteFunctionDispatches(): void
+    {
+        $version = $this->sqlite->sqlite_function('version', 'versionString');
+        $this->assertIsString($version);
+    }
+
+    public function testSqliteFunctionThrowsForUnknownMethod(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->sqlite->sqlite_function('no_such_method');
     }
 }

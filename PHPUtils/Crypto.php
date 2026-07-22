@@ -9,9 +9,15 @@ namespace PHPUtils;
 /* ────────────────────────────────────────────────────────────────────────── */
 /**
  * Crypto
- * 
- * A class to handle encryption and hashing
- * 
+ *
+ * Lightweight encryption and hashing helpers — not a full crypto framework.
+ *
+ * Security notes:
+ * - Prefer `$iv = true` on encrypt/decrypt helpers; `$iv = false` is legacy and weak for CBC.
+ * - `$password` is used as the raw cipher key (no KDF). Derive a key yourself (e.g. hash_pbkdf2) for real secrets.
+ * - `hash()` / `verifyhash()` are digests with timing-safe compare — not password storage.
+ *   Use PHP's `password_hash()` / `password_verify()` for user passwords.
+ *
  * @package PHPUtils
  */
 class Crypto extends Base {
@@ -33,9 +39,9 @@ class Crypto extends Base {
      * When $iv is true, a random IV is used and prepended to the ciphertext (base64(iv_raw . ciphertext)).
      *
      * @param string $str The string to encrypt
-     * @param string $password The password to use
+     * @param string $password Raw cipher key material (not stretched — see class docblock)
      * @param string $method The encryption method. Defaults to aes-256-cbc
-     * @param bool $iv Whether to use a random IV (prepended to output). Defaults to false
+     * @param bool $iv Whether to use a random IV (prepended to output). Defaults to false (legacy; prefer true)
      * @return string The encrypted string (when iv=true, base64 of IV + ciphertext)
      */
     public function encryptwithpw(string $str, string $password, string $method = 'aes-256-cbc', bool $iv = false): string {
@@ -75,7 +81,7 @@ class Crypto extends Base {
     }
 
     /**
-     * Hash a string using the given algorithm.
+     * Digest a string (not for password storage — use password_hash()).
      *
      * @param string $str The string to hash
      * @param string $hash The hash algorithm. Defaults to sha512
@@ -86,7 +92,7 @@ class Crypto extends Base {
     }
 
     /**
-     * Verify a string against a hash (timing-safe comparison).
+     * Verify a string against a digest (timing-safe). Not for password_hash() hashes.
      *
      * @param string $str The string to verify
      * @param string $hash The hash to verify against

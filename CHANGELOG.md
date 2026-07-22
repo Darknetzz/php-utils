@@ -15,8 +15,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **CI**: GitHub Actions workflow (`.github/workflows/php.yml`) running PHPUnit on PHP 8.0–8.4 for `main` and `dev`.
 - **CHANGELOG.md**: This file.
 
+### Removed
+
+- Empty stub modules `API`, `Auth`, and `Session` (no implementation). Orphaned Doc pages for those classes removed; regenerate `Docs/` when convenient.
+- **SQLite::res()** status-array wrapper (callers should use return values / exceptions).
+
 ### Changed
 
+- **SQLite error handling**: Methods now throw `RuntimeException` / `InvalidArgumentException` and return real values (`\SQLite3`, `\SQLite3Result`, `bool`, arrays) instead of `["status" => …, "data" => …]`. `sqlite_table_exists()` correctly returns `bool` (previously returned a status array, so existence checks were always truthy).
+- **Crypto / Network docs**: Class and method notes call out sharp defaults (raw password-as-key, optional IV, digest vs `password_hash`, spoofable `X-Forwarded-For`).
+- **OOP_REVIEW.md**: Marked historical; points to CHANGELOG / REFACTORING_SUMMARY for current state.
 - **Error handling**: Replaced `die()` with exceptions in Network, Random, Files, and Debugger (bootstrap `_All.php` still uses `die()` for fatal startup failures).
   - `Network::getUserIP()` / `getServerIP()`: throw `RuntimeException` when `$die_if_empty` is true and IP cannot be determined.
   - `Random::genStr()`: throw `InvalidArgumentException` for invalid type instead of `die()`.

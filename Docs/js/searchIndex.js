@@ -1,16 +1,5 @@
 Search.appendIndex(
-    [
-                {
-            "fqsen": "\\API",
-            "name": "API",
-            "summary": "API",
-            "url": "classes/API.html"
-        },                {
-            "fqsen": "\\Auth",
-            "name": "Auth",
-            "summary": "Auth",
-            "url": "classes/Auth.html"
-        },                {
+    [                {
             "fqsen": "\\Base",
             "name": "Base",
             "summary": "Base",
@@ -305,11 +294,6 @@ Search.appendIndex(
             "name": "jQuery",
             "summary": "Includes\u0020the\u0020jQuery\u0020JS\u0020file\u0020from\u0020a\u0020CDN.",
             "url": "classes/Resources.html#method_jQuery"
-        },                {
-            "fqsen": "\\Session",
-            "name": "Session",
-            "summary": "Base",
-            "url": "classes/Session.html"
         },                {
             "fqsen": "\\SQL",
             "name": "SQL",

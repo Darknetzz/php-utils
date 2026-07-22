@@ -46,9 +46,13 @@ class Network extends Base {
   /**
    * Get the user's IP address.
    *
+   * Warning: if `HTTP_X_FORWARDED_FOR` is present, it is preferred over `REMOTE_ADDR`.
+   * Clients can spoof that header unless you only trust it when `$reverse_proxy`
+   * matches the immediate peer (`REMOTE_ADDR`). Prefer passing your known proxy IP.
+   *
    * @param  string|null $reverse_proxy The IP address of the reverse proxy server.
    * @param  bool $return_array Whether to return the result as an array or not.
-   * @param  bool $die_if_empty Whether to die if the user's IP cannot be determined.
+   * @param  bool $die_if_empty Whether to throw if the user's IP cannot be determined.
    * @return string|array|null The user's IP address or an array with 'type' and 'userip' keys if $return_array is true. Returns null if $die_if_empty is false and the user's IP cannot be determined.
    */
   public function getUserIP(

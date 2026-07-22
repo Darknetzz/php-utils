@@ -54,8 +54,6 @@ $hashedPassword = $crypto->hash("MyPassword123");
 # Modules
 API documentation is generated in the `Docs/` folder. Class reference:
 
-* [API](Docs/classes/API.html)
-* [Auth](Docs/classes/Auth.html)
 * [Calendar](Docs/classes/Calendar.html)
 * [Crypto](Docs/classes/Crypto.html)
 * [Debugger](Docs/classes/Debugger.html)
@@ -66,12 +64,13 @@ API documentation is generated in the `Docs/` folder. Class reference:
 * [Network](Docs/classes/Network.html)
 * [Random](Docs/classes/Random.html)
 * [Resources](Docs/classes/Resources.html)
-* [Session](Docs/classes/Session.html)
 * [SQL](Docs/classes/SQL.html)
 * [SQLite](Docs/classes/SQLite.html)
 * [Strings](Docs/classes/Strings.html)
 * [Times](Docs/classes/Times.html)
 * [Vars](Docs/classes/Vars.html)
+
+Empty stub modules (`API`, `Auth`, `Session`) were removed; regenerate `Docs/` after structural changes if you maintain the HTML reference locally.
 
 ## Changelog
 

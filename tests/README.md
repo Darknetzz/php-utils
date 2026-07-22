@@ -65,7 +65,7 @@ phpunit
 - is_file, file_read (including exception for missing file)
 
 ### SQLiteTest
-- res(), clean(), sqlite_create_db / select_db / drop_db
+- clean(), create/select/drop db, table lifecycle, exception paths
 
 ### TimesTest
 - getCurrentTime, relativeTime

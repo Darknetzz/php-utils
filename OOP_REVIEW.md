@@ -1,5 +1,9 @@
 # PHPUtils OOP Code Review
 
+> **Historical / outdated.** This review describes the codebase *before* the namespaces / DI / strict-types refactor.
+> Prefer [CHANGELOG.md](CHANGELOG.md) and [REFACTORING_SUMMARY.md](REFACTORING_SUMMARY.md) for the current state.
+> Kept for context on why those changes were made — do not treat the “Major Issues” below as still true.
+
 ## Executive Summary
 
 Your PHPUtils codebase has a **functional OOP structure** with some good practices, but there are several areas that need improvement to follow modern PHP OOP best practices. The code works, but could be more maintainable, testable, and follow PHP standards better.
