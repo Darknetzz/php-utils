@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Random Poisson helpers**: `uniformOpen()`, `normal()`, `exponential()`, `poisson()`, `poissonCount()`, and `poissonProcess()` for exponential inter-arrivals and homogeneous Poisson processes (e.g. variable bot/action counts).
 - **Strict types**: `declare(strict_types=1);` in all PHP library and test files.
 - **Vars::arrayContainsSubstring()**: Alias for `arrayInString()` with clearer naming.
 - **Tests**: New test classes for Crypto, Files, SQLite, Times, and Random.

@@ -103,4 +103,136 @@ class Random extends Base {
         return (mt_rand(0, 100) <= $chance);
     }
 
+    /**
+     * Uniform sample on the open interval (0, 1).
+     * Never returns 0, so it is safe to pass to log().
+     */
+    public function uniformOpen(): float
+    {
+        return (mt_rand() + 1) / (mt_getrandmax() + 1);
+    }
+
+    /**
+     * Sample from Normal(mean, stddev) via Box–Muller.
+     */
+    public function normal(float $mean = 0.0, float $stddev = 1.0): float
+    {
+        if ($stddev < 0.0) {
+            throw new \InvalidArgumentException(__METHOD__ . ': stddev must be >= 0');
+        }
+        if ($stddev === 0.0) {
+            return $mean;
+        }
+
+        $u1 = $this->uniformOpen();
+        $u2 = $this->uniformOpen();
+        $z = sqrt(-2.0 * log($u1)) * cos(2.0 * M_PI * $u2);
+
+        return $mean + $stddev * $z;
+    }
+
+    /**
+     * Sample an inter-arrival time from Exponential(rate).
+     * Mean waiting time is 1/rate (same units as the rate reciprocal).
+     *
+     * @param  float $rate  Intensity λ > 0 (events per unit time)
+     */
+    public function exponential(float $rate): float
+    {
+        if ($rate <= 0.0) {
+            throw new \InvalidArgumentException(__METHOD__ . ': rate must be > 0');
+        }
+
+        return -log($this->uniformOpen()) / $rate;
+    }
+
+    /**
+     * Sample from Poisson(lambda): count of events with mean lambda.
+     * Useful for “how many bot actions this tick?” with mean ≈ lambda.
+     *
+     * @param  float $lambda  Expected event count (>= 0)
+     */
+    public function poisson(float $lambda): int
+    {
+        if ($lambda < 0.0) {
+            throw new \InvalidArgumentException(__METHOD__ . ': lambda must be >= 0');
+        }
+        if ($lambda === 0.0) {
+            return 0;
+        }
+
+        // Knuth algorithm — fine for typical small rates (e.g. bot ticks).
+        if ($lambda < 30.0) {
+            $L = exp(-$lambda);
+            $k = 0;
+            $p = 1.0;
+            do {
+                $k++;
+                $p *= $this->uniformOpen();
+            } while ($p > $L);
+
+            return $k - 1;
+        }
+
+        // Normal approximation for larger means.
+        $sample = $this->normal($lambda, sqrt($lambda)) + 0.5;
+
+        return max(0, (int) floor($sample));
+    }
+
+    /**
+     * Expected event count for a homogeneous Poisson process over a duration.
+     * Equivalent to poisson(rate * duration).
+     *
+     * @param  float $rate      Events per unit time (>= 0)
+     * @param  float $duration  Length of the interval (>= 0)
+     */
+    public function poissonCount(float $rate, float $duration): int
+    {
+        if ($rate < 0.0) {
+            throw new \InvalidArgumentException(__METHOD__ . ': rate must be >= 0');
+        }
+        if ($duration < 0.0) {
+            throw new \InvalidArgumentException(__METHOD__ . ': duration must be >= 0');
+        }
+
+        return $this->poisson($rate * $duration);
+    }
+
+    /**
+     * Simulate a homogeneous Poisson process on [t0, t0 + duration).
+     * Returns ascending event timestamps (empty when rate or duration is 0).
+     *
+     * @param  float $rate      Events per unit time (>= 0)
+     * @param  float $duration  Length of the interval (>= 0)
+     * @param  float $t0        Start time of the interval
+     * @return list<float>
+     */
+    public function poissonProcess(float $rate, float $duration, float $t0 = 0.0): array
+    {
+        if ($rate < 0.0) {
+            throw new \InvalidArgumentException(__METHOD__ . ': rate must be >= 0');
+        }
+        if ($duration < 0.0) {
+            throw new \InvalidArgumentException(__METHOD__ . ': duration must be >= 0');
+        }
+        if ($rate === 0.0 || $duration === 0.0) {
+            return [];
+        }
+
+        $events = [];
+        $t = $t0;
+        $end = $t0 + $duration;
+
+        while (true) {
+            $t += $this->exponential($rate);
+            if ($t >= $end) {
+                break;
+            }
+            $events[] = $t;
+        }
+
+        return $events;
+    }
+
 }
