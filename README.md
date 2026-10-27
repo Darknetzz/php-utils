@@ -1,4 +1,7 @@
 # php-utils
+
+<p align="center"><img src="docs/images/banner-gradient.png" alt="php-utils" width="720"></p>
+
 General-purpose PHP utility classes. Requires PHP 8.0+.
 
 
